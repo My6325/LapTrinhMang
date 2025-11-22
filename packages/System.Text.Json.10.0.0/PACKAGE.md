@@ -1,253 +1,32 @@
-## About
-
-<!-- A description of the package and where one can find more documentation -->
-
-Provides high-performance and low-allocating types that serialize objects to JavaScript Object Notation (JSON) text and deserialize JSON text to objects, with UTF-8 support built-in. Also provides types to read and write JSON text encoded as UTF-8, and to create an in-memory document object model (DOM), that is read-only, for random access of the JSON elements within a structured view of the data.
-
-## Key Features
-
-<!-- The key features of this package -->
-
-* High-performance reader and writer types for UTF-8 encoded JSON.
-* A fully-featured JSON serializer for .NET types using reflection or source generated contracts.
-* A high-performance read-only JSON DOM (JsonDocument) and a mutable DOM that interoperates with the serializer (JsonNode).
-* Built-in support for async serialization, including IAsyncEnumerable support.
-* Fully customizable contract model for serializable types.
-
-## How to Use
-
-<!-- A compelling example on how to use this package with code, as well as any specific guidelines for when to use the package -->
-
-The System.Text.Json library is built-in as part of the shared framework in .NET Runtime. The package can be installed when you need to use the most recent version in older target frameworks.
-
-Serialization:
-```csharp
-using System;
-using System.Text.Json;
-
-WeatherForecast forecast = new (DateTimeOffset.Now, 26.6f, "Sunny");
-var serialized = JsonSerializer.Serialize(forecast);
-
-Console.WriteLine(serialized);
-// {"Date":"2023-08-02T16:01:20.9025406+00:00","TemperatureCelsius":26.6,"Summary":"Sunny"}
-
-var forecastDeserialized = JsonSerializer.Deserialize<WeatherForecast>(serialized);
-Console.WriteLine(forecast == forecastDeserialized);
-// True
-
-public record WeatherForecast(DateTimeOffset Date, float TemperatureCelsius, string? Summary);
-```
-
-Serialization using the source generator:
-```csharp
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
-WeatherForecast forecast = new (DateTimeOffset.Now, 26.6f, "Sunny");
-var serialized = JsonSerializer.Serialize(forecast, SourceGenerationContext.Default.WeatherForecast);
-
-Console.WriteLine(serialized);
-// {"Date":"2023-08-02T16:01:20.9025406+00:00","TemperatureCelsius":26.6,"Summary":"Sunny"}
-
-var forecastDeserialized = JsonSerializer.Deserialize<WeatherForecast>(serialized, SourceGenerationContext.Default.WeatherForecast);
-Console.WriteLine(forecast == forecastDeserialized);
-// True
-
-public record WeatherForecast(DateTimeOffset Date, float TemperatureCelsius, string? Summary);
-
-[JsonSourceGenerationOptions(WriteIndented = true)]
-[JsonSerializable(typeof(WeatherForecast))]
-internal partial class SourceGenerationContext : JsonSerializerContext
-{
-}
-```
-
-Using the JSON DOM:
-```csharp
-
-using System;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-
-string jsonString =
-@"{
-  ""Date"": ""2019-08-01T00:00:00"",
-  ""Temperature"": 25,
-  ""Summary"": ""Hot"",
-  ""DatesAvailable"": [
-    ""2019-08-01T00:00:00"",
-    ""2019-08-02T00:00:00""
-  ],
-  ""TemperatureRanges"": {
-      ""Cold"": {
-          ""High"": 20,
-          ""Low"": -10
-      },
-      ""Hot"": {
-          ""High"": 60,
-          ""Low"": 20
-      }
-  }
-}
-";
-
-JsonNode forecastNode = JsonNode.Parse(jsonString)!;
-
-
-// Get value from a JsonNode.
-JsonNode temperatureNode = forecastNode["Temperature"]!;
-Console.WriteLine($"Type={temperatureNode.GetType()}");
-Console.WriteLine($"JSON={temperatureNode.ToJsonString()}");
-//output:
-//Type = System.Text.Json.Nodes.JsonValue`1[System.Text.Json.JsonElement]
-//JSON = 25
-
-// Get a typed value from a JsonNode.
-int temperatureInt = (int)forecastNode["Temperature"]!;
-Console.WriteLine($"Value={temperatureInt}");
-//output:
-//Value=25
-
-// Get a typed value from a JsonNode by using GetValue<T>.
-temperatureInt = forecastNode["Temperature"]!.GetValue<int>();
-Console.WriteLine($"TemperatureInt={temperatureInt}");
-//output:
-//Value=25
-
-// Get a JSON object from a JsonNode.
-JsonNode temperatureRanges = forecastNode["TemperatureRanges"]!;
-Console.WriteLine($"Type={temperatureRanges.GetType()}");
-Console.WriteLine($"JSON={temperatureRanges.ToJsonString()}");
-//output:
-//Type = System.Text.Json.Nodes.JsonObject
-//JSON = { "Cold":{ "High":20,"Low":-10},"Hot":{ "High":60,"Low":20} }
-
-// Get a JSON array from a JsonNode.
-JsonNode datesAvailable = forecastNode["DatesAvailable"]!;
-Console.WriteLine($"Type={datesAvailable.GetType()}");
-Console.WriteLine($"JSON={datesAvailable.ToJsonString()}");
-//output:
-//datesAvailable Type = System.Text.Json.Nodes.JsonArray
-//datesAvailable JSON =["2019-08-01T00:00:00", "2019-08-02T00:00:00"]
-
-// Get an array element value from a JsonArray.
-JsonNode firstDateAvailable = datesAvailable[0]!;
-Console.WriteLine($"Type={firstDateAvailable.GetType()}");
-Console.WriteLine($"JSON={firstDateAvailable.ToJsonString()}");
-//output:
-//Type = System.Text.Json.Nodes.JsonValue`1[System.Text.Json.JsonElement]
-//JSON = "2019-08-01T00:00:00"
-
-// Get a typed value by chaining references.
-int coldHighTemperature = (int)forecastNode["TemperatureRanges"]!["Cold"]!["High"]!;
-Console.WriteLine($"TemperatureRanges.Cold.High={coldHighTemperature}");
-//output:
-//TemperatureRanges.Cold.High = 20
-
-// Parse a JSON array
-JsonNode datesNode = JsonNode.Parse(@"[""2019-08-01T00:00:00"",""2019-08-02T00:00:00""]")!;
-JsonNode firstDate = datesNode[0]!.GetValue<DateTime>();
-Console.WriteLine($"firstDate={ firstDate}");
-//output:
-//firstDate = "2019-08-01T00:00:00"
-```
-
-Using the low-level JSON reader/writer types
-```csharp
-using System;
-using System.IO;
-using System.Text;
-using System.Text.Json;
-
-var writerOptions = new JsonWriterOptions
-{
-    Indented = true
-};
-
-using var stream = new MemoryStream();
-using var writer = new Utf8JsonWriter(stream, writerOptions);
-
-writer.WriteStartObject();
-writer.WriteString("date", DateTimeOffset.Parse("8/2/2023 9:00 AM"));
-writer.WriteNumber("temp", 42);
-writer.WriteEndObject();
-writer.Flush();
-
-var jsonBytes = stream.ToArray();
-string json = Encoding.UTF8.GetString(jsonBytes);
-Console.WriteLine(json);
-// {
-//   "date": "2023-08-02T09:00:00+00:00"
-//   "temp": 42
-// }
-
-var readerOptions = new JsonReaderOptions
-{
-    AllowTrailingCommas = true,
-    CommentHandling = JsonCommentHandling.Skip
-};
-var reader = new Utf8JsonReader(jsonBytes, readerOptions);
-
-while (reader.Read())
-{
-    Console.Write(reader.TokenType);
-
-    switch (reader.TokenType)
-    {
-        case JsonTokenType.PropertyName:
-        case JsonTokenType.String:
-            {
-                string? text = reader.GetString();
-                Console.Write(" ");
-                Console.Write(text);
-                break;
-            }
-
-        case JsonTokenType.Number:
-            {
-                int intValue = reader.GetInt32();
-                Console.Write(" ");
-                Console.Write(intValue);
-                break;
-            }
-
-            // Other token types elided for brevity
-    }
-    Console.WriteLine();
-}
-// StartObject
-// PropertyName date
-// String 2023-08-02T09:00:00+00:00
-// PropertyName temp
-// Number 42
-// EndObject
-```
-
-## Main Types
-
-<!-- The main types provided in this library -->
-
-The main types provided by this library are:
-
-* `System.Text.Json.Utf8JsonWriter`
-* `System.Text.Json.Utf8JsonReader`
-* `System.Text.Json.JsonSerializer`
-* `System.Text.Json.JsonConverter`
-* `System.Text.Json.JsonDocument`
-* `System.Text.Json.Nodes.JsonNode`
-* `System.Text.Json.Serialization.Metadata.JsonTypeInfo`
-
-## Additional Documentation
-
-* [Conceptual documentation](https://learn.microsoft.com/dotnet/standard/serialization/system-text-json/overview)
-* [API documentation](https://learn.microsoft.com/dotnet/api/system.text.json)
-
-## Related Packages
-
-<!-- The related packages associated with this package -->
-
-* Lightweight data formats abstraction: [System.Memory.Data](https://www.nuget.org/packages/System.Memory.Data/)
-* Serialization of HttpContent: [System.Net.Http.Json](https://www.nuget.org/packages/System.Net.Http.Json/)
+(Precision 3640) | precision-3640-workstation" lob="Dell Precision WorkStation" mediakey="USB">
+        <drivers>
+          <driver title="Intel PCIe Ethernet Controller Driver" url="https://downloads.dell.com/FOLDER07531332M/1/Intel-PCIe-Ethernet-Controller-Driver_XX4J1_WIN_25.5.0.0_A20_Win10-x64.zip" size="372504" sha256="f722dd3df7422e39c5ad660787d0f8594d1072028eb36ceb252f7e7d8f8bca88" subsystem="NI" releasedate="2021-07-07T17:07:48" dellversion="A20" vendorversion="25.5.0.0" swbid="1784K" revision="ARev"/>
+          <driver title="Dell ControlVault2 Driver and Firmware" url="https://downloads.dell.com/FOLDER06246269M/1/Dell-ControlVault2-Driver-and-Firmware_N23KC_WIN64_4.12.5.8_A21_Win10-x64.zip" size="9443812" sha256="c02e71f3675ac9f289f3aa1c16ebc66dccc80fb02f8e272a56f7f6e0979d191f" subsystem="SY" releasedate="2020-05-27T20:51:07" dellversion="A21" vendorversion="4.12.5.8" swbid="3DCFD" revision="ARev"/>
+          <driver title="Qualcomm QCA61x4A/QCA9377 Wi-Fi and Bluetooth Driver" url="https://downloads.dell.com/FOLDER07055568M/1/Qualcomm-QCA61x4A-QCA9377-Wi-Fi-and-Bluetooth-Driver_VK99J_WIN_12.0.0.1016_A42_02_Win10-x64.zip" size="3409968" sha256="681e627948f51b0c886e9879a4650893042f969bf5aa510736760154e173619a" subsystem="NI" releasedate="2021-03-18T14:43:40" dellversion="A42" vendorversion="12.0.0.1016" swbid="6XFG3" revision="ARev"/>
+          <driver title="Intel I210/I350/X540/X550/X710 NIC Driver" url="https://downloads.dell.com/FOLDER07208827M/1/Intel-I210-I350-X540-X550-X710-NIC-Driver_X0VX3_WIN64_25.6.0_A03_01_Win10-x64.zip" size="4794692" sha256="ceddf2274f6909c21378d8e49515bc1e2d70f30f8b22367bf4ca50c519e207f9" subsystem="NI" releasedate="2021-05-25T17:15:57" dellversion="A03" vendorversion="25.6.0" swbid="J58FC" revision="ARev"/>
+          <driver title="Intel Rapid Storage Technology Driver" url="https://downloads.dell.com/FOLDER07498577M/1/Intel-Rapid-Storage-Technology-Driver_62C56_WIN64_17.9.6.1019_A04_01_Win10-x64.zip" size="11191320" sha256="bbc4ac7b424fc1e3012e880a069eaaf0598d2b4cc7b9fb0e56d996c4a2684010" subsystem="SA" releasedate="2021-06-28T13:20:21" dellversion="A04" vendorversion="17.9.6.1019" swbid="JW13F" revision="ARev"/>
+          <driver title="Aquantia 5G Network Add-in Card Driver" url="https://downloads.dell.com/FOLDER06734357M/1/Aquantia-5G-Network-Add-in-Card-Driver_VNMX8_WIN_2.1.21.0_A06_Win10-x64.zip" size="117921" sha256="061107fa7e82fed1211077dfcd11876038984afa0695c7c3cbba64c2eb5fede9" subsystem="NI" releasedate="2020-11-02T14:08:57" dellversion="A06" vendorversion="2.1.21.0" swbid="MTN2M" revision="ARev"/>
+          <driver title="Intel AX210/AX200/AX201/9260/9560/9462 Wi-Fi UWD Driver" url="https://downloads.dell.com/FOLDER07395395M/1/Intel-AX210-AX200-AX201-9260-9560-9462-Wi-Fi-UWD_PK22G_WIN_22.40.0.7_A30_02_Win10-x64.zip" size="27023829" sha256="082b13ab19fe1621df33452f716578adf37afa9f2f531a2ee7f13c4175d1b3dd" subsystem="NI" releasedate="2021-06-15T15:52:48" dellversion="A30" vendorversion="22.40.0.7" swbid="RR4WV" revision="ARev"/>
+          <driver title="Intel Chipset Device Software" url="https://downloads.dell.com/FOLDER06246265M/1/Intel-Chipset-Device-Software_33Y03_WIN_10.1.18295.8201_A12_Win10-x64.zip" size="225263" sha256="ce48eec189fe7452c3ddc8cbcdbaf3d6d3499767f925986de7b2d6cca42ac52b" subsystem="CS" releasedate="2020-05-27T19:53:21" dellversion="A12" vendorversion="10.1.18295.8201" swbid="VNK7K" revision="ARev"/>
+          <driver title="Realtek Memory Card Reader Driver" url="https://downloads.dell.com/FOLDER06246266M/1/Realtek-Memory-Card-Reader-Driver_F60FH_WIN_10.0.18362.31252_A04_01_Win10-x64.zip" size="2157962" sha256="2e954b7bfe6ca4d73d740932537d44ff5c2839e6b9de2b74297b0aaae4c35487" subsystem="CS" releasedate="2020-05-27T19:47:27" dellversion="A04" vendorversion="10.0.18362.31252" swbid="YF4J7" revision="ARev"/>
+        </drivers>
+      </platform>
+      <platform id="09C0" phid="PHA113P" description="Brook Hollow 14 MLK (Latitude 5411 14 Mainstream Comet Lake H) | latitude-14-5411-laptop" lob="Latitude" mediakey="NONE">
+        <drivers>
+          <driver title="Intel Serial IO Driver" url="https://downloads.dell.com/FOLDER08765311M/1/Intel-Serial-IO-Driver_3MK53_WIN_30.100.2020.7_A06_04_Win10-x64.zip" size="329736" sha256="c8850a4d8f9b8311f9964b5e578a629939edbfdb0847277d1f22987368c7f374" subsystem="CS" releasedate="2022-07-13T18:58:51" dellversion="A06" vendorversion="30.100.2020.7" swbid="2TYXX" revision="ARev"/>
+          <driver title="Qualcomm QCA61x4A/QCA6174A-XR/QCA9377 Wi-Fi and Bluetooth Driver" url="https://downloads.dell.com/FOLDER06734336M/1/Qualcomm-QCA61x4A-QCA6174A-XR-QCA9377-Wi-Fi-and-Bluetooth_HH8M4_WIN_12.0.0.953_A28_03_Win10-x64.zip" size="3390002" sha256="f9f47b97d774a57dd74a11dd772da556f873886cbc5e6905b84f2979dcbbc3ea" subsystem="NI" releasedate="2020-11-02T13:57:46" dellversion="A28" vendorversion="12.0.0.953" swbid="64XXY" revision="ARev"/>
+          <driver title="Dell ControlVault3 Driver and Firmware" url="https://downloads.dell.com/FOLDER07119896M/1/Dell-ControlVault3-Driver-and-Firmware_58K7G_WIN_5.5.26.70_A14_Win10-x64.zip" size="13938719" sha256="14942c8aea1571794bd9639f373410722e050b745625ac3f355d3a84fd3a8de2" subsystem="SY" releasedate="2021-03-05T15:18:46" dellversion="A14" vendorversion="5.5.26.70" swbid="6XKT1" revision="ARev"/>
+          <driver title="Intel PCIe Ethernet Controller Driver" url="https://downloads.dell.com/FOLDER07592514M/1/Intel-PCIe-Ethernet-Controller-Driver_RRXWR_WIN_25.5.0.1_A21_01_Win10-x64.zip" size="370460" sha256="ce88c0314eb1e2a83e9d6a5522f3764ab4cc9b18941e274be759de04e157080e" subsystem="NI" releasedate="2021-07-26T21:42:39" dellversion="A21" vendorversion="25.5.0.1" swbid="D3G01" revision="ARev"/>
+          <driver title="Intel AX2xx/9560/9260/9462/8265/3165 Wi-Fi UWD Driver" url="https://downloads.dell.com/FOLDER09054520M/1/Network-AX2xx_with_DMAr_JCVCC_WT4.zip" size="38291413" sha256="93b0487890aa344285acf3412826add638960e938cc57588b7088ef49011f73c" subsystem="NI" releasedate="2022-10-04T18:36:16" dellversion="A26" vendorversion="22.150.1.1" swbid="H9R43" revision="ARev"/>
+          <driver title="Intel Chipset Device Software" url="https://downloads.dell.com/FOLDER06209208M/1/Intel-Chipset-Device-Software_5J88W_WIN_10.1.18267.8194_A11_01_Win10-x64.zip" size="213929" sha256="360d682687b913916490a5ea39e39562705dabdc332dd49b8c4ccfad6874c119" subsystem="CS" releasedate="2020-05-01T01:40:30" dellversion="A11" vendorversion="10.1.18267.8194" swbid="JMYGF" revision="ARev"/>
+          <driver title="Dell PointStick Driver" url="https://downloads.dell.com/FOLDER06209204M/1/Dell-PointStick-Driver_05V45_WIN_10.3201.101.312_A01_01_Win10-x64.zip" size="5516028" sha256="b56a9d0a0deb2850e0409a75612bd81162851c5d18a956d27140f6aa94e514d9" subsystem="IN" releasedate="2020-05-07T16:42:41" dellversion="A01" vendorversion="10.3201.101.312" swbid="TM3MD" revision="ARev"/>
+          <driver title="Realtek Memory Card Reader Driver" url="https://downloads.dell.com/FOLDER05818891M/1/Realtek-Memory-Card-Reader-Driver_RC7P8_WIN_10.0.18362.21317_A04_02_Win10-x64.zip" size="2465756" sha256="c2b5c2ea75d491c97105baa497107de419bdca19a59db4790fdace2844ab35a7" subsystem="CS" releasedate="2019-09-05T18:13:45" dellversion="A04" vendorversion="10.0.18362.21317" swbid="VPRFX" revision="ARev"/>
+        </drivers>
+      </platform>
+      <platform id="09C1" phid="PHA114P" description="Brook Hollow 15 MLK (Latitude 5511 15 Mainstream Comet Lake H) | latitude-15-5511-laptop" lob="Latitude" mediakey="NONE">
+        <drivers>
+          <driver title="Intel Serial IO Driver" url="https://downloads.dell.com/FOLDER08765311M/1/Intel-Serial-IO-Driver_3MK53_WIN_30.100.2020.7_A06_04_Win10-x64.zip" size="329736" sha256="c8850a4d8f9b8311f9964b5e578a629939edbfdb0847277d1f22987368c7f374" subsystem="CS" releasedate="2022-07-13T18:58:51" dellversion="A06" vendorversion="30.100.2020.7" swbid="2TYXX" revision="ARev"/>
+          <driver title="Intel PCIe Ethernet Controller Driver" url="https://downloads.dell.com/FOLDER06209217M/1/Intel-PCIe-Ethernet-Controller-Driver_XXPWM_WIN_25.0.0.0_A15_Win10-x64.zip" size="739802" sha256="c178fc03275edc2ad2d3b0b31daa1537bf7e9aystem.Net.Http.Json](https://www.nuget.org/packages/System.Net.Http.Json/)
 
 
 ## Feedback & Contributing

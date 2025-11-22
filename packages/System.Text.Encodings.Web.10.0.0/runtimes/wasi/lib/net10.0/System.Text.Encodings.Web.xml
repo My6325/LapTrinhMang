@@ -1,200 +1,47 @@
-<?xml version="1.0"?>
-<doc>
-    <assembly>
-        <name>System.Text.Encodings.Web</name>
-    </assembly>
-    <members>
-        <member name="M:System.IO.TextWriterExtensions.WritePartialString(System.IO.TextWriter,System.String,System.Int32,System.Int32)">
-            <summary>
-            Writes a partial string (given offset and count) to the underlying TextWriter.
-            </summary>
-        </member>
-        <member name="T:System.Text.Encodings.Web.AsciiByteMap">
-            <summary>
-            A lookup map that maps individual ASCII chars to a single byte.
-            Storing a 0 byte indicates that no mapping exists for this input.
-            </summary>
-        </member>
-        <member name="M:System.Text.Encodings.Web.AsciiByteMap.TryLookup(System.Text.Rune,System.Byte@)">
-            <summary>
-            Returns false if <paramref name="key"/> is non-ASCII or if it
-            maps to a zero value.
-            </summary>
-        </member>
-        <member name="T:System.Text.Encodings.Web.AllowedBmpCodePointsBitmap">
-            <summary>
-            A bitmap which represents all 64k codepoints in the
-            Basic Multilingual Plane.
-            </summary>
-        </member>
-        <member name="M:System.Text.Encodings.Web.AllowedBmpCodePointsBitmap.AllowChar(System.Char)">
-            <summary>
-            Adds the given <see cref="T:System.Char"/> to the bitmap's allow list.
-            </summary>
-        </member>
-        <member name="M:System.Text.Encodings.Web.AllowedBmpCodePointsBitmap.ForbidChar(System.Char)">
-            <summary>
-            Removes the given <see cref="T:System.Char"/> from the bitmap's allow list.
-            </summary>
-        </member>
-        <member name="M:System.Text.Encodings.Web.AllowedBmpCodePointsBitmap.ForbidHtmlCharacters">
-            <summary>
-            Removes all HTML-sensitive characters from the bitmap's allow list.
-            </summary>
-        </member>
-        <member name="M:System.Text.Encodings.Web.AllowedBmpCodePointsBitmap.ForbidUndefinedCharacters">
-            <summary>
-            Removes from the bitmap's allow list all code points which aren't mapped to defined characters
-            or which are otherwise always disallowed.
-            </summary>
-            <remarks>
-            Always-disallowed categories include Cc, Cs, Co, Cn, Zs [except U+0020 SPACE], Zl, and Zp.
-            </remarks>
-        </member>
-        <member name="M:System.Text.Encodings.Web.AllowedBmpCodePointsBitmap.IsCharAllowed(System.Char)">
-            <summary>
-            Queries the bitmap to see if the given <see cref="T:System.Char"/> is in the allow list.
-            </summary>
-        </member>
-        <member name="M:System.Text.Encodings.Web.AllowedBmpCodePointsBitmap.IsCodePointAllowed(System.UInt32)">
-            <summary>
-            Queries the bitmap to see if the given code point is in the allow list.
-            </summary>
-        </member>
-        <member name="T:System.Text.Encodings.Web.OptimizedInboxTextEncoder">
-            <summary>
-            Allows efficient escaping for the library's built-in types (HTML, URL, JS).
-            Assumes the following:
-              (a) All C0 and C1 code points are disallowed.
-              (b) Escaping 1 ASCII input character results in no more than 6 output characters.
-              (c) All Unicode scalar values may be represented in escaped form.
-              (d) The escaped form of any Unicode scalar value consists of only ASCII characters.
-            </summary>
-        </member>
-        <member name="T:System.Text.Encodings.Web.OptimizedInboxTextEncoder.AsciiPreescapedData">
-             <summary>
-             A bitmap which represents the 64-bit pre-escaped form of the ASCII code points.
-             A pre-escaped code point has the form [ WW 00 FF EE DD CC BB AA ],
-             where AA - FF are the six-ASCII-byte escaped representation of the
-             code point, zero-padded at the end. The high byte of the pre-escaped form
-             is the number of non-zero bytes which make up the pre-escaped data.
-            
-             Example: If the escaped form of "@" is "%40", the pre-escaped form will be:
-             0x30_00_00_00_00_30_34_25. Iterate over the least significant bytes one-by-one
-             to reconstruct the escaped representation, stopping when you hit a null byte.
-             </summary>
-        </member>
-        <member name="M:System.Text.Encodings.Web.OptimizedInboxTextEncoder.IsScalarValueAllowed(System.Text.Rune)">
-            <summary>
-            Given a scalar value, returns a value stating whether that value is present
-            in this encoder's allow list.
-            </summary>
-        </member>
-        <member name="T:System.Text.Encodings.Web.ScalarEscaperBase">
-            <summary>
-            A class that can escape a scalar value and write either UTF-16 or UTF-8 format.
-            </summary>
-        </member>
-        <member name="T:System.Text.Encodings.Web.HtmlEncoder">
-            <summary>
-            Represents a type used to do HTML encoding.
-            </summary>
-        </member>
-        <member name="P:System.Text.Encodings.Web.HtmlEncoder.Default">
-            <summary>
-            Returns a default built-in instance of <see cref="T:System.Text.Encodings.Web.HtmlEncoder"/>.
-            </summary>
-        </member>
-        <member name="M:System.Text.Encodings.Web.HtmlEncoder.Create(System.Text.Encodings.Web.TextEncoderSettings)">
-            <summary>
-            Creates a new instance of HtmlEncoder with provided settings.
-            </summary>
-            <param name="settings">Settings used to control how the created <see cref="T:System.Text.Encodings.Web.HtmlEncoder"/> encodes, primarily which characters to encode.</param>
-            <returns>A new instance of the <see cref="T:System.Text.Encodings.Web.HtmlEncoder"/>.</returns>
-        </member>
-        <member name="M:System.Text.Encodings.Web.HtmlEncoder.Create(System.Text.Unicode.UnicodeRange[])">
-            <summary>
-            Creates a new instance of HtmlEncoder specifying character to be encoded.
-            </summary>
-            <param name="allowedRanges">Set of characters that the encoder is allowed to not encode.</param>
-            <returns>A new instance of the <see cref="T:System.Text.Encodings.Web.HtmlEncoder"/></returns>
-            <remarks>Some characters in <paramref name="allowedRanges"/> might still get encoded, i.e. this parameter is just telling the encoder what ranges it is allowed to not encode, not what characters it must not encode.</remarks>
-        </member>
-        <member name="T:System.Text.Encodings.Web.JavaScriptEncoder">
-            <summary>
-            Represents a type used to do JavaScript encoding/escaping.
-            </summary>
-        </member>
-        <member name="P:System.Text.Encodings.Web.JavaScriptEncoder.Default">
-            <summary>
-            Returns a default built-in instance of <see cref="T:System.Text.Encodings.Web.JavaScriptEncoder"/>.
-            </summary>
-        </member>
-        <member name="P:System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping">
-            <summary>
-            Returns a built-in instance of <see cref="T:System.Text.Encodings.Web.JavaScriptEncoder"/> that is less strict about what gets encoded.
-            </summary>
-            <remarks>
-            <para>
-            Unlike the <see cref="P:System.Text.Encodings.Web.JavaScriptEncoder.Default"/>, this encoder instance does not escape HTML-sensitive characters like &lt;, &gt;, &amp;, etc. and hence must be used cautiously
-            (for example, if the output data is within a response whose content-type is known with a charset set to UTF-8).
-            </para>
-            <para>
-            Unlike the <see cref="P:System.Text.Encodings.Web.JavaScriptEncoder.Default"/>, the quotation mark is encoded as \" rather than \u0022.
-            </para>
-            <para>
-            Unlike the <see cref="P:System.Text.Encodings.Web.JavaScriptEncoder.Default"/> (which only allows <see cref="P:System.Text.Unicode.UnicodeRanges.BasicLatin"/>), using this encoder instance allows <see cref="P:System.Text.Unicode.UnicodeRanges.All"/> to go through unescaped.
-            </para>
-            <para>
-            Unlike the <see cref="P:System.Text.Encodings.Web.JavaScriptEncoder.Default"/>, this encoder instance allows some other characters to go through unescaped (for example, '+'), and hence must be used cautiously.
-            </para>
-            </remarks>
-        </member>
-        <member name="M:System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Encodings.Web.TextEncoderSettings)">
-            <summary>
-            Creates a new instance of JavaScriptEncoder with provided settings.
-            </summary>
-            <param name="settings">Settings used to control how the created <see cref="T:System.Text.Encodings.Web.JavaScriptEncoder"/> encodes, primarily which characters to encode.</param>
-            <returns>A new instance of the <see cref="T:System.Text.Encodings.Web.JavaScriptEncoder"/>.</returns>
-        </member>
-        <member name="M:System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRange[])">
-            <summary>
-            Creates a new instance of JavaScriptEncoder specifying character to be encoded.
-            </summary>
-            <param name="allowedRanges">Set of characters that the encoder is allowed to not encode.</param>
-            <returns>A new instance of the <see cref="T:System.Text.Encodings.Web.JavaScriptEncoder"/>.</returns>
-            <remarks>Some characters in <paramref name="allowedRanges"/> might still get encoded, i.e. this parameter is just telling the encoder what ranges it is allowed to not encode, not what characters it must not encode.</remarks>
-        </member>
-        <member name="T:System.Text.Encodings.Web.TextEncoder">
-            <summary>
-            An abstraction representing various text encoders.
-            </summary>
-            <remarks>
-            TextEncoder subclasses can be used to do HTML encoding, URI encoding, and JavaScript encoding.
-            Instances of such subclasses can be accessed using <see cref="P:System.Text.Encodings.Web.HtmlEncoder.Default"/>, <see cref="P:System.Text.Encodings.Web.UrlEncoder.Default"/>, and <see cref="P:System.Text.Encodings.Web.JavaScriptEncoder.Default"/>.
-            </remarks>
-        </member>
-        <member name="M:System.Text.Encodings.Web.TextEncoder.TryEncodeUnicodeScalar(System.Int32,System.Char*,System.Int32,System.Int32@)">
-            <summary>
-            Encodes a Unicode scalar into a buffer.
-            </summary>
-            <param name="unicodeScalar">Unicode scalar.</param>
-            <param name="buffer">The destination of the encoded text.</param>
-            <param name="bufferLength">Length of the destination <paramref name="buffer"/> in chars.</param>
-            <param name="numberOfCharactersWritten">Number of characters written to the <paramref name="buffer"/>.</param>
-            <returns>Returns false if <paramref name="bufferLength"/> is too small to fit the encoded text, otherwise returns true.</returns>
-            <remarks>This method is seldom called directly. One of the TextEncoder.Encode overloads should be used instead.
-            Implementations of <see cref="T:System.Text.Encodings.Web.TextEncoder"/> need to be thread safe and stateless.
-            </remarks>
-        </member>
-        <member name="M:System.Text.Encodings.Web.TextEncoder.FindFirstCharacterToEncode(System.Char*,System.Int32)">
-            <summary>
-            Finds index of the first character that needs to be encoded.
-            </summary>
-            <param name="text">The text buffer to search.</param>
-            <param name="textLength">The number of characters in the <paramref name="text"/>.</param>
-            <returns></returns>
-            <remarks>This method is seldom called directly. It's used by higher level helper APIs.</remarks>
+-Fi-UWD-Driver_1CRR8_WIN_21.110.2.1_A24_02_Win10-x64.zip" size="25077620" sha256="01e1412190f7bfeb1781dc049c133ae21ddf82fd943ee1def314474d5afa7af6" subsystem="NI" releasedate="2020-10-09T13:28:46" dellversion="A24" vendorversion="21.110.2.1" swbid="53Y1T" revision="ARev"/>
+          <driver title="Intel AX200/AX201/9260/9560/9462/8265/8260/7265/3165 Bluetooth UWD Driver" url="https://downloads.dell.com/FOLDER05818868M/1/Intel-AX200-AX201-9260-9560-9462-8265-8260-7265-3165_9303N_WIN_21.20.0.4_A15_03_Win10-x64.zip" size="30630242" sha256="861606183040fa55104b5f350d011b7e397b72f5301bfaf9877f49fd1b6bcf4d" subsystem="NI" releasedate="2019-09-05T17:38:16" dellversion="A15" vendorversion="21.20.0.4" swbid="VCXYN" revision="ARev"/>
+          <driver title="Realtek PCIe Ethernet Controller Driver" url="https://downloads.dell.com/FOLDER05818881M/1/Realtek-PCIe-Ethernet-Controller-Driver_J85T7_WIN_2.45.2019.0529_A24_01_Win10-x64.zip" size="598999" sha256="9dc960bc3564d8b74830bc1a40f149642bb642265bf72385bbd094e38593d611" subsystem="NI" releasedate="2019-09-05T17:38:16" dellversion="A24" vendorversion="2.45.2019.0529" swbid="XR1NC" revision="ARev"/>
+        </drivers>
+      </platform>
+      <platform id="0955" phid="PH7806P" description="INSP NB,MANTISN5 14CML,5490/98 | inspiron-14-5490-laptop" lob="Inspiron" mediakey="NONE">
+        <drivers>
+          <driver title="Realtek Memory Card Reader Driver" url="https://downloads.dell.com/FOLDER05818850M/1/Realtek-Memory-Card-Reader-Driver_3PDRC_WIN_10.0.18362.31248_A02_Win10-x64.zip" size="2161988" sha256="1e6573beb6f4001f4ccee83fe51cb00b4d43e5fd88942ab4f2dc1438bf2ac21d" subsystem="CS" releasedate="2019-09-05T17:38:16" dellversion="A02" vendorversion="10.0.18362.31248" swbid="0F95T" revision="ARev"/>
+          <driver title="Intel Chipset Device Software Driver" url="https://downloads.dell.com/FOLDER05818867M/1/Intel-Chipset-Device-Software-Driver_9NNTR_WIN_10.1.18019.8144_A08_01_Win10-x64.zip" size="163589" sha256="98d04312ddde0a090cd8fc7a8be6f081688a9ca11890a5d21e97fc7302f5de8d" subsystem="CS" releasedate="2019-09-05T17:38:16" dellversion="A08" vendorversion="10.1.18019.8144" swbid="13NTF" revision="ARev"/>
+          <driver title="Intel Serial IO Driver" url="https://downloads.dell.com/FOLDER05818862M/1/Intel-Serial-IO-Driver_810FP_WIN_30.100.1915.1_A03_Win10-x64.zip" size="1294575" sha256="b2168c11d4b76f245ec9bc972c96a5988ae665e3e564d29e2be183bea443aeb4" subsystem="CS" releasedate="2019-09-05T18:04:24" dellversion="A03" vendorversion="30.100.1915.1" swbid="4501M" revision="ARev"/>
+          <driver title="Intel Rapid Storage Technology Driver" url="https://downloads.dell.com/FOLDER05818889M/1/Intel-Rapid-Storage-Technology-Driver_PCRHD_WIN_17.5.0.1017_A00_01_Win10-x64.zip" size="8334065" sha256="6482d504c8e8eb4b9abde6a12cbaed79558d0e6507d4c61d48f626d1ee686d18" subsystem="SA" releasedate="2021-09-29T00:11:21" dellversion="A00" vendorversion="17.5.0.1017" swbid="G3HM5" revision="ARev"/>
+          <driver title="Intel AX200/AX201/9260/9560/9462 WiFi UWD Driver" url="https://downloads.dell.com/FOLDER06246271M/1/Intel-AX200-AX201-9260-9560-9462-WiFi-UWD-Driver_VR862_WIN_21.80.0.4_A19_02_Win10-x64.zip" size="21503370" sha256="f89c04d0fb95bdee2878159a0546adbeae21d28125da997bd04cf254b947b672" subsystem="NI" releasedate="2020-06-03T17:18:02" dellversion="A19" vendorversion="21.80.0.4" swbid="JFMC1" revision="ARev"/>
+          <driver title="Intel AX200/AX201/9260/9560/9462/8265/8260/7265/3165 Bluetooth UWD Driver" url="https://downloads.dell.com/FOLDER05818868M/1/Intel-AX200-AX201-9260-9560-9462-8265-8260-7265-3165_9303N_WIN_21.20.0.4_A15_03_Win10-x64.zip" size="30630242" sha256="861606183040fa55104b5f350d011b7e397b72f5301bfaf9877f49fd1b6bcf4d" subsystem="NI" releasedate="2019-09-05T17:38:16" dellversion="A15" vendorversion="21.20.0.4" swbid="VCXYN" revision="ARev"/>
+          <driver title="Realtek USB GBE Ethernet Controller Driver" url="https://downloads.dell.com/FOLDER05818886M/1/Realtek-USB-GBE-Ethernet-Controller-Driver_MT3YW_WIN_2.45.2019.0618_A18_01_Win10-x64.zip" size="263561" sha256="12ea6880bec7daa7b5bd0e6d5bf8bdccd182a6d1746647ddf60ea16163719abf" subsystem="NI" releasedate="2022-03-04T21:47:11" dellversion="A18" vendorversion="2.45.2019.0618" swbid="W7K33" revision="ARev"/>
+        </drivers>
+      </platform>
+      <platform id="0956" phid="PH7806P" description="INSP NB,MANTISN5 14CML,5490/98 | inspiron-14-5490-laptop" lob="Inspiron" mediakey="NONE">
+        <drivers>
+          <driver title="Realtek Memory Card Reader Driver" url="https://downloads.dell.com/FOLDER05818850M/1/Realtek-Memory-Card-Reader-Driver_3PDRC_WIN_10.0.18362.31248_A02_Win10-x64.zip" size="2161988" sha256="1e6573beb6f4001f4ccee83fe51cb00b4d43e5fd88942ab4f2dc1438bf2ac21d" subsystem="CS" releasedate="2019-09-05T17:38:16" dellversion="A02" vendorversion="10.0.18362.31248" swbid="0F95T" revision="ARev"/>
+          <driver title="Intel Chipset Device Software Driver" url="https://downloads.dell.com/FOLDER05818867M/1/Intel-Chipset-Device-Software-Driver_9NNTR_WIN_10.1.18019.8144_A08_01_Win10-x64.zip" size="163589" sha256="98d04312ddde0a090cd8fc7a8be6f081688a9ca11890a5d21e97fc7302f5de8d" subsystem="CS" releasedate="2019-09-05T17:38:16" dellversion="A08" vendorversion="10.1.18019.8144" swbid="13NTF" revision="ARev"/>
+          <driver title="Intel Serial IO Driver" url="https://downloads.dell.com/FOLDER05818862M/1/Intel-Serial-IO-Driver_810FP_WIN_30.100.1915.1_A03_Win10-x64.zip" size="1294575" sha256="b2168c11d4b76f245ec9bc972c96a5988ae665e3e564d29e2be183bea443aeb4" subsystem="CS" releasedate="2019-09-05T18:04:24" dellversion="A03" vendorversion="30.100.1915.1" swbid="4501M" revision="ARev"/>
+          <driver title="Intel Rapid Storage Technology Driver" url="https://downloads.dell.com/FOLDER05818889M/1/Intel-Rapid-Storage-Technology-Driver_PCRHD_WIN_17.5.0.1017_A00_01_Win10-x64.zip" size="8334065" sha256="6482d504c8e8eb4b9abde6a12cbaed79558d0e6507d4c61d48f626d1ee686d18" subsystem="SA" releasedate="2021-09-29T00:11:21" dellversion="A00" vendorversion="17.5.0.1017" swbid="G3HM5" revision="ARev"/>
+          <driver title="Intel AX200/AX201/9260/9560/9462 WiFi UWD Driver" url="https://downloads.dell.com/FOLDER06246271M/1/Intel-AX200-AX201-9260-9560-9462-WiFi-UWD-Driver_VR862_WIN_21.80.0.4_A19_02_Win10-x64.zip" size="21503370" sha256="f89c04d0fb95bdee2878159a0546adbeae21d28125da997bd04cf254b947b672" subsystem="NI" releasedate="2020-06-03T17:18:02" dellversion="A19" vendorversion="21.80.0.4" swbid="JFMC1" revision="ARev"/>
+          <driver title="Intel AX200/AX201/9260/9560/9462/8265/8260/7265/3165 Bluetooth UWD Driver" url="https://downloads.dell.com/FOLDER05818868M/1/Intel-AX200-AX201-9260-9560-9462-8265-8260-7265-3165_9303N_WIN_21.20.0.4_A15_03_Win10-x64.zip" size="30630242" sha256="861606183040fa55104b5f350d011b7e397b72f5301bfaf9877f49fd1b6bcf4d" subsystem="NI" releasedate="2019-09-05T17:38:16" dellversion="A15" vendorversion="21.20.0.4" swbid="VCXYN" revision="ARev"/>
+          <driver title="Realtek USB GBE Ethernet Controller Driver" url="https://downloads.dell.com/FOLDER05818886M/1/Realtek-USB-GBE-Ethernet-Controller-Driver_MT3YW_WIN_2.45.2019.0618_A18_01_Win10-x64.zip" size="263561" sha256="12ea6880bec7daa7b5bd0e6d5bf8bdccd182a6d1746647ddf60ea16163719abf" subsystem="NI" releasedate="2022-03-04T21:47:11" dellversion="A18" vendorversion="2.45.2019.0618" swbid="W7K33" revision="ARev"/>
+        </drivers>
+      </platform>
+      <platform id="0957" phid="PH7829P" description="INSP,NB,MANTISN5 15CML,5590/98 | inspiron-15-5590-laptop" lob="Inspiron" mediakey="NONE">
+        <drivers>
+          <driver title="Realtek Memory Card Reader Driver" url="https://downloads.dell.com/FOLDER05818850M/1/Realtek-Memory-Card-Reader-Driver_3PDRC_WIN_10.0.18362.31248_A02_Win10-x64.zip" size="2161988" sha256="1e6573beb6f4001f4ccee83fe51cb00b4d43e5fd88942ab4f2dc1438bf2ac21d" subsystem="CS" releasedate="2019-09-05T17:38:16" dellversion="A02" vendorversion="10.0.18362.31248" swbid="0F95T" revision="ARev"/>
+          <driver title="Intel Chipset Device Software Driver" url="https://downloads.dell.com/FOLDER05818867M/1/Intel-Chipset-Device-Software-Driver_9NNTR_WIN_10.1.18019.8144_A08_01_Win10-x64.zip" size="163589" sha256="98d04312ddde0a090cd8fc7a8be6f081688a9ca11890a5d21e97fc7302f5de8d" subsystem="CS" releasedate="2019-09-05T17:38:16" dellversion="A08" vendorversion="10.1.18019.8144" swbid="13NTF" revision="ARev"/>
+          <driver title="Intel Rapid Storage Technology Driver" url="https://downloads.dell.com/FOLDER06782876M/1/Intel-Rapid-Storage-Technology-Driver_KTG51_WIN64_17.9.1.1009_A03_Win10-x64.zip" size="11381386" sha256="05042ac098bd6a8d538f52301c3fd2345cc5e48a73770c3e7133cac779d3fbb4" subsystem="SA" releasedate="2020-11-12T14:59:17" dellversion="A03" vendorversion="17.9.1.1009" swbid="2HN21" revision="ARev"/>
+          <driver title="Intel Serial IO Driver" url="https://downloads.dell.com/FOLDER05818862M/1/Intel-Serial-IO-Driver_810FP_WIN_30.100.1915.1_A03_Win10-x64.zip" size="1294575" sha256="b2168c11d4b76f245ec9bc972c96a5988ae665e3e564d29e2be183bea443aeb4" subsystem="CS" releasedate="2019-09-05T18:04:24" dellversion="A03" vendorversion="30.100.1915.1" swbid="4501M" revision="ARev"/>
+          <driver title="Intel AX200/AX201/9260/9560/9462 WiFi UWD Driver" url="https://downloads.dell.com/FOLDER06246271M/1/Intel-AX200-AX201-9260-9560-9462-WiFi-UWD-Driver_VR862_WIN_21.80.0.4_A19_02_Win10-x64.zip" size="21503370" sha256="f89c04d0fb95bdee2878159a0546adbeae21d28125da997bd04cf254b947b672" subsystem="NI" releasedate="2020-06-03T17:18:02" dellversion="A19" vendorversion="21.80.0.4" swbid="JFMC1" revision="ARev"/>
+          <driver title="Intel HID Event Filter Driver" url="https://downloads.dell.com/FOLDER06164817M/1/Intel-HID-Event-Filter-Driver_33CDY_WIN_2.2.1.377_A11_02_Win10-x64.zip" size="44698" sha256="fb52c549090df0a86b02be074eaa57d5977218e86339aaab3ba14e12475dd084" subsystem="IN" releasedate="2020-03-23T19:10:40" dellversion="A11" vendorversion="2.2.1.377" swbid="PNHMR" revision="ARev"/>
+          <driver title="Goodix Fingerprint Sensor Driver" url="https://downloads.dell.com/FOLDER06782882M/1/Goodix-Fingerprint-Sensor-Driver_N7N2X_WIN64_3.10.30.110_A04_03_Win10-x64.zip" size="6296625" sha256="ac1158275296ab952cb5bc521689b2bcced250edee763118e8eccd22992a49f7" subsystem="SY" releasedate="2020-11-12T14:57:29" dellversion="A04" vendorversion="3.10.30.110" swbid="TFRM5" revision="ARev"/>
+          <driver title="Intel AX200/AX201/9260/9560/9462/8265/8260/7265/3165 Bluetooth UWD Driver" url="https://downloads.dell.com/FOLDER05818868M/1/Intel-AX200-AX201-9260-9560-9462-8265-8260-7265-3165_9303N_WIN_21.20.0.4_A15_03_Win10-x64.zip" size="30630242" sha256="861606183040fa55104b5f350d011b7e397b72f5301bfaf9877f49fd1b6bcf4d" subsystem="NI" releasedate="2019-09-05T17:38:16" dellversion="A15" vendorversion="21.20.0.4" swbid="VCXYN" revision="ARev"/>
+          <driver title="Realtek USB GBE Ethernet Controller Driver" url="https://downloads.dell.com/FOLDER05818886M/1/Realtek-USB-GBE-Ethernet-Controller-Driver_MT3YW_WIN_2.45.2019.0618_A18_01_Win10-x64.zip" size="263561" sha256="12ea6880bec7daa7b5bd0e6d5bf8bdccd182a6d1746647ddf60ea16163719abf" subsystem="NI" releasedate="2022-03-04T21:47:11" dellversion="A18" vendorversion="2.45.2019.0618" swbid="W7K33" revision="ARev"/>
+        </drivers>
+      </platform>
+      <platform id="0958" phid="PH7829P" description="INSP,NB,MANTISN5 15CML,5590/98 | inspiron-15-5590-laptop" lob="Inspiron" mediakey="NONE">
+        <drivers>
+          <driver title="Realtek Memory Card Reader Driver" url="https://downloads.dell.com/FOLDER05818850M/1/Realtek-Memory-Card-Reader-Driver_3PDRC_WIN_10.0.18362.31248_A02_Win10-x64.zip" size="2161988" sha256="1e6573beb6f4001f4ccee83fe51cb00b4d43e5fd88942ab4f2dc1438bf2ac21d" subsystem="CS" releasedate="2019-09-05T17:38:16" dellversion="A02" vendorversion="10.0.18362.31248" swbid="0F95T" revision="ARev"/>
+          <driver title="Intel Chipset Device Software Driver" url="https://downloads.dell.com/FOLDER05818867M/1/Intel-Chipset-Device-Software-Driver_9NNTR_WIN_10.1.18019.8144_A08_01_Win10-x64.zip" size="163589" sha256="98d04312ddde0a090cd8fc7a8be6f081688a9ca11890a5d21e97fc7302f5de8d" subsystem="CS" releaseds.</remarks>
         </member>
         <member name="M:System.Text.Encodings.Web.TextEncoder.WillEncode(System.Int32)">
             <summary>

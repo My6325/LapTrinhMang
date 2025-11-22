@@ -19,6 +19,7 @@ namespace LapTrinhMang
     {
         private List<ClientInfo> dsMay;
         private ServerSocket serverSocket = new ServerSocket();
+        private List<Student> dsSinhVien = new List<Student>();
         public Server()
         {
             InitializeComponent();
@@ -85,15 +86,17 @@ namespace LapTrinhMang
                     }
                     try
                     {
-                        string dsSvJson = JsonSerializer.Serialize(dsMay);
-                        serverSocket.BroadcastMessage($"DSSV|{dsSvJson}");
+                        if (dsSinhVien != null && dsSinhVien.Count > 0)
+                        {
+                            string dsSvJson = JsonSerializer.Serialize(dsSinhVien);
+                            serverSocket.BroadcastMessage($"DSSV|{dsSvJson}");
+                        }
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show($"Lỗi gửi DS SV: {ex.Message}");
                     }
                     LoadDanhSachMay();
-                    //MessageBox.Show("Client đã kết nối: " + ip);
                 }));
             };
 
@@ -121,30 +124,32 @@ namespace LapTrinhMang
                     // 1. Kiểm tra tin nhắn Điểm danh: Format: "DIEMDANH|{JSON_StudentInfo}"
                     if (msg.StartsWith("DIEMDANH|"))
                     {
-                        string studentJson = msg.Split(new[] { '|' }, 2)[1];
-                        // Yêu cầu thư viện System.Text.Json hoặc Newtonsoft.Json
-                        // Giả định bạn có thể Deserialize studentJson thành StudentInfo object.
+                        string mssv = msg.Split(new[] { '|' }, 2)[1].Trim();
 
-                        // VÍ DỤ ĐƠN GIẢN: CHỈ LẤY MSSV TỪ JSON
-                        // Để đơn giản, ta chỉ cần MSSV:
-                        string mssv = "MSSV_TEMP"; // Cần parse JSON để lấy MSSV thực
-
-                        // Tìm sinh viên trong danh sách gốc (dsMay) bằng MSSV
-                        var svTrongDS = dsMay.FirstOrDefault(x => x.MSSV == mssv);
-
-                        if (svTrongDS != null)
+                        if (string.IsNullOrEmpty(mssv))
                         {
-                            // Cập nhật thông tin cho máy đó
-                            svTrongDS.IP = ip; // Lưu IP tạm thời của máy đang kết nối
-                            svTrongDS.IsConnected = true;
-                            // Nếu muốn lưu HoTen, Lop vào ClientInfo (nếu ClientInfo có các thuộc tính này)
+                            MessageBox.Show("Gói điểm danh không hợp lệ (MSSV rỗng).");
+                            return;
+                        }
 
-                            MessageBox.Show($"Sinh viên {mssv} đã điểm danh tại IP {ip}!");
+                        // Tìm sinh viên trong danh sách sinh viên
+                        var sv = dsSinhVien?.FirstOrDefault(x => x.MSSV == mssv);
+
+                        // Tìm máy theo IP đang kết nối
+                        var may = dsMay.FirstOrDefault(x => x.IP == ip);
+                        if (may != null)
+                        {
+                            may.MSSV = mssv;
+                            may.IsConnected = true;
+                        }
+
+                        if (sv != null)
+                        {
+                            MessageBox.Show($"Sinh viên {sv.HoTen} ({sv.MSSV} - {sv.Lop}) đã điểm danh tại IP {ip}!");
                         }
                         else
                         {
-                            // Xử lý trường hợp MSSV không có trong danh sách gốc
-                            MessageBox.Show($"MSSV {mssv} không hợp lệ hoặc đã điểm danh!");
+                            MessageBox.Show($"MSSV {mssv} đã điểm danh tại IP {ip} (không tìm thấy trong danh sách).");
                         }
 
                         LoadDanhSachMay();
@@ -168,30 +173,32 @@ namespace LapTrinhMang
             };
         }
 
-        private List<ClientInfo> ReadDanhSachSinhVien(string filePath)
+        private List<Student> ReadDanhSachSinhVien(string filePath)
         {
-            List<ClientInfo> list = new List<ClientInfo>();
+            List<Student> list = new List<Student>();
             string ext = Path.GetExtension(filePath).ToLower();
 
             if (ext == ".txt")
             {
                 var lines = File.ReadAllLines(filePath);
 
+                // bỏ dòng tiêu đề, bắt đầu từ dòng 2
                 for (int i = 1; i < lines.Length; i++)
                 {
+                    if (string.IsNullOrWhiteSpace(lines[i])) continue;
+
                     var parts = lines[i].Split(',');
                     if (parts.Length >= 3)
                     {
-                        list.Add(new ClientInfo()
+                        list.Add(new Student
                         {
                             MSSV = parts[0].Trim(),
-                            IP = "Chưa điểm danh",
-                            IsConnected = false
+                            HoTen = parts[1].Trim(),
+                            Lop = parts[2].Trim()
                         });
                     }
                 }
             }
-
             else if (ext == ".xlsx")
             {
                 OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -199,37 +206,63 @@ namespace LapTrinhMang
                 using (var package = new ExcelPackage(new FileInfo(filePath)))
                 {
                     var ws = package.Workbook.Worksheets[0];
-                    int row = 2;
+                    int row = 2; // bỏ dòng tiêu đề
 
                     while (ws.Cells[row, 1].Value != null)
                     {
-                        string mssv = ws.Cells[row, 1].Text;
-
-                        list.Add(new ClientInfo()
+                        list.Add(new Student
                         {
-                            MSSV = mssv,
-                            IP = "Chưa điểm danh",
-                            IsConnected = false
+                            MSSV = ws.Cells[row, 1].Text.Trim(),
+                            HoTen = ws.Cells[row, 2].Text.Trim(),
+                            Lop = ws.Cells[row, 3].Text.Trim()
                         });
-
                         row++;
                     }
                 }
             }
+
             return list;
         }
 
         private void btnLayDS_Click(object sender, EventArgs e)
         {
+            if (dsMay == null || dsMay.Count == 0)
+            {
+                MessageBox.Show("Bạn phải tạo danh sách máy trước");
+                return;
+            }
+
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "Text or Excel|*.txt;*.xlsx";
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                dsMay = ReadDanhSachSinhVien(ofd.FileName);
-                LoadDanhSachMay();
+                dsSinhVien = ReadDanhSachSinhVien(ofd.FileName);
 
-                MessageBox.Show("Đã tải danh sách thành công!");
+                if (dsSinhVien.Count == 0)
+                {
+                    MessageBox.Show("Không đọc được sinh viên nào từ file!");
+                    return;
+                }
+
+                if (dsSinhVien.Count > dsMay.Count)
+                {
+                    MessageBox.Show("Số sinh viên nhiều hơn số máy! Không thể ghép.");
+                    return;
+                }
+
+                LoadDanhSachMay();
+                MessageBox.Show("Đã đọc danh sách sinh viên!");
+
+                try
+                {
+                    string json = JsonSerializer.Serialize(dsSinhVien);
+                    serverSocket.BroadcastMessage("DSSV|" + json);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi gửi danh sách sinh viên cho Client: " + ex.Message);
+                }
             }
         }
     }

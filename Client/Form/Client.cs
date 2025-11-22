@@ -21,6 +21,7 @@ namespace Client
         private int serverPort = 8888;
 
         private List<StudentInfo> dsSinhVienClient = new List<StudentInfo>();
+        private bool eventsRegistered = false;
 
         private bool IsConnected => socket.IsConnected;
 
@@ -34,9 +35,7 @@ namespace Client
         {
             txtIP.Text = GetLocalIPAddress();
 
-            cbTTSV.DataSource = dsSinhVienClient;
-            cbTTSV.DisplayMember = "HoTen";
-            cbTTSV.ValueMember = "MSSV";
+            cbTTSV.DataSource = null;
 
             UpdateUI(false);
         }
@@ -55,7 +54,7 @@ namespace Client
         private void btnConnect_Click(object sender, EventArgs e)
         {
             string ip = txtIP.Text.Trim();
-            int port = 8888;
+            int port = serverPort;
 
             if (string.IsNullOrEmpty(ip))
             {
@@ -63,30 +62,85 @@ namespace Client
                 return;
             }
 
+            if (IsConnected)
+            {
+                socket.Disconnect();
+                UpdateUI(false);
+                return;
+            }
+
+            if (!eventsRegistered)
+            {
+                socket.OnReceiveMessage += (msg) =>
+                {
+                    if (msg.StartsWith("DSSV|"))
+                    {
+                        string json = msg.Substring("DSSV|".Length);
+
+                        try
+                        {
+                            var ds = JsonSerializer.Deserialize<List<StudentInfo>>(json);
+                            if (ds != null)
+                            {
+                                Invoke(new Action(() =>
+                                {
+                                    dsSinhVienClient = ds;
+                                    cbTTSV.DataSource = null;
+                                    cbTTSV.DataSource = dsSinhVienClient;
+                                    cbTTSV.DisplayMember = "HoTen";
+                                    cbTTSV.ValueMember = "MSSV";
+                                }));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Invoke(new Action(() =>
+                            {
+                                MessageBox.Show("Lỗi parse DSSV từ server: " + ex.Message);
+                            }));
+                        }
+                    }
+                    else
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            MessageBox.Show("Server gửi: " + msg);
+                        }));
+                    }
+                };
+
+                socket.OnReceiveFile += (fileBytes) =>
+                {
+                    Invoke(new Action(() =>
+                    {
+                        MessageBox.Show("Đã nhận file từ Server!");
+                    }));
+                };
+
+                socket.OnDisconnected += () =>
+                {
+                    Invoke(new Action(() =>
+                    {
+                        MessageBox.Show("Mất kết nối Server!");
+                        UpdateUI(false);
+                    }));
+                };
+
+                eventsRegistered = true;
+            }
+
+            // 2SAU KHI GẮN EVENT MỚI CONNECT
             bool ok = socket.Connect(ip, port);
             if (ok)
             {
                 MessageBox.Show("Kết nối server thành công!");
+                UpdateUI(true);
             }
             else
             {
                 MessageBox.Show("Kết nối thất bại! Hãy kiểm tra IP hoặc Server chưa chạy.");
+                return;
             }
-
-            socket.OnReceiveMessage += (msg) =>
-            {
-                MessageBox.Show("Server gửi: " + msg);
-            };
-
-            socket.OnReceiveFile += (fileBytes) =>
-            {
-                MessageBox.Show("Đã nhận file từ Server!");
-            };
-
-            socket.OnDisconnected += () =>
-            {
-                MessageBox.Show("Mất kết nối Server!");
-            };
         }
 
         private void btnĐiemDanh_Click(object sender, EventArgs e)
