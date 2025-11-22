@@ -9,6 +9,7 @@ namespace LapTrinhMang.Models
     public class ClientInfo
     {
         public string MSSV {  get; set; }
+        public string HoTen {  get; set; }
         public string IP { get; set; }
         public bool IsConnected { get; set; }
     }

@@ -12,15 +12,22 @@ namespace LapTrinhMang
 {
     public partial class ucMayConnect : UserControl
     {
+        private ToolTip toolTip = new ToolTip();
+
         public ucMayConnect()
         {
             InitializeComponent();
         }
 
-        public void SetInfo(string mssv, string ip)
+        public void SetInfo(string mssv, string ip, string hoTen)
         {
             txtMSSV.Text = mssv;
             txtIP.Text = "IP: " + ip;
+
+            toolTip.SetToolTip(this, hoTen);
+            toolTip.SetToolTip(txtMSSV, hoTen);
+            toolTip.SetToolTip(txtIP, hoTen);
+            toolTip.SetToolTip(pictureBox1, hoTen);
         }
     }
 }

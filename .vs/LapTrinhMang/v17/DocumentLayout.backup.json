@@ -1,0 +1,292 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\LapTrinhMang\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|D:\\LapTrinhMang\\laptrinhmang\\form\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|D:\\LapTrinhMang\\laptrinhmang\\form\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\usercontrol\\ucmaydisconnect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\usercontrol\\ucmaydisconnect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\usercontrol\\ucmayconnect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\usercontrol\\ucmayconnect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\usercontrol\\ucmayconnect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\usercontrol\\ucmayconnect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|D:\\LapTrinhMang\\laptrinhmang\\models\\clientinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\models\\clientinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|d:\\laptrinhmang\\client\\form\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|solutionrelative:client\\form\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|D:\\LapTrinhMang\\client\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|solutionrelative:client\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|D:\\LapTrinhMang\\client\\form\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|solutionrelative:client\\form\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|D:\\LapTrinhMang\\client\\models\\studentinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|solutionrelative:client\\models\\studentinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|D:\\LapTrinhMang\\laptrinhmang\\networking\\serversocket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\networking\\serversocket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|D:\\LapTrinhMang\\client\\networking\\clientsocket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|solutionrelative:client\\networking\\clientsocket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|D:\\LapTrinhMang\\laptrinhmang\\utils\\filehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\utils\\filehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|D:\\LapTrinhMang\\laptrinhmang\\models\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\models\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|D:\\LapTrinhMang\\laptrinhmang\\form\\frmnhapip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\frmnhapip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|D:\\LapTrinhMang\\laptrinhmang\\form\\frmnhapip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\frmnhapip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Server.cs [Design]",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\Server.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\Server.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\Server.cs [Design]",
+              "RelativeToolTip": "LapTrinhMang\\Form\\Server.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.696Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Server.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\Server.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\Server.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\Server.cs",
+              "RelativeToolTip": "LapTrinhMang\\Form\\Server.cs",
+              "ViewState": "AgIAACABAAAAAAAAAAAswCwBAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.697Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ucMayDisconnect.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\UserControl\\ucMayDisconnect.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\UserControl\\ucMayDisconnect.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\UserControl\\ucMayDisconnect.cs",
+              "RelativeToolTip": "LapTrinhMang\\UserControl\\ucMayDisconnect.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAcwB0AAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T15:10:17.906Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ucMayConnect.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\UserControl\\ucMayConnect.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\UserControl\\ucMayConnect.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\UserControl\\ucMayConnect.cs",
+              "RelativeToolTip": "LapTrinhMang\\UserControl\\ucMayConnect.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAcwBcAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T15:10:07.935Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ucMayConnect.cs [Design]",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\UserControl\\ucMayConnect.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\UserControl\\ucMayConnect.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\UserControl\\ucMayConnect.cs [Design]",
+              "RelativeToolTip": "LapTrinhMang\\UserControl\\ucMayConnect.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T15:04:07.627Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Client.cs [Design]",
+              "DocumentMoniker": "D:\\LapTrinhMang\\Client\\Form\\Client.cs",
+              "RelativeDocumentMoniker": "Client\\Form\\Client.cs",
+              "ToolTip": "D:\\LapTrinhMang\\Client\\Form\\Client.cs [Design]",
+              "RelativeToolTip": "Client\\Form\\Client.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.703Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ClientInfo.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Models\\ClientInfo.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Models\\ClientInfo.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Models\\ClientInfo.cs",
+              "RelativeToolTip": "LapTrinhMang\\Models\\ClientInfo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.705Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\Client\\Program.cs",
+              "RelativeDocumentMoniker": "Client\\Program.cs",
+              "ToolTip": "D:\\LapTrinhMang\\Client\\Program.cs",
+              "RelativeToolTip": "Client\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.694Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "StudentInfo.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\Client\\Models\\StudentInfo.cs",
+              "RelativeDocumentMoniker": "Client\\Models\\StudentInfo.cs",
+              "ToolTip": "D:\\LapTrinhMang\\Client\\Models\\StudentInfo.cs",
+              "RelativeToolTip": "Client\\Models\\StudentInfo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.699Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Client.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\Client\\Form\\Client.cs",
+              "RelativeDocumentMoniker": "Client\\Form\\Client.cs",
+              "ToolTip": "D:\\LapTrinhMang\\Client\\Form\\Client.cs",
+              "RelativeToolTip": "Client\\Form\\Client.cs",
+              "ViewState": "AgIAAKIAAAAAAAAAAAAmwLkAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.7Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ClientSocket.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\Client\\Networking\\ClientSocket.cs",
+              "RelativeDocumentMoniker": "Client\\Networking\\ClientSocket.cs",
+              "ToolTip": "D:\\LapTrinhMang\\Client\\Networking\\ClientSocket.cs",
+              "RelativeToolTip": "Client\\Networking\\ClientSocket.cs",
+              "ViewState": "AgIAAH4AAAAAAAAAAAAmwIwAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.701Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ServerSocket.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Networking\\ServerSocket.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Networking\\ServerSocket.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Networking\\ServerSocket.cs",
+              "RelativeToolTip": "LapTrinhMang\\Networking\\ServerSocket.cs",
+              "ViewState": "AgIAAJMAAAAAAAAAAAAcwKIAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.702Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "FileHelper.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Utils\\FileHelper.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Utils\\FileHelper.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Utils\\FileHelper.cs",
+              "RelativeToolTip": "LapTrinhMang\\Utils\\FileHelper.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.703Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Student.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Models\\Student.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Models\\Student.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Models\\Student.cs",
+              "RelativeToolTip": "LapTrinhMang\\Models\\Student.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.704Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "FrmNhapIP.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\FrmNhapIP.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\FrmNhapIP.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\FrmNhapIP.cs",
+              "RelativeToolTip": "LapTrinhMang\\Form\\FrmNhapIP.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAAAuwCkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.706Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "FrmNhapIP.cs [Design]",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\FrmNhapIP.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\FrmNhapIP.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\FrmNhapIP.cs [Design]",
+              "RelativeToolTip": "LapTrinhMang\\Form\\FrmNhapIP.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T14:51:43.707Z",
+              "EditorCaption": " [Design]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

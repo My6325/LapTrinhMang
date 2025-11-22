@@ -6,12 +6,13 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.Spreadsheet;
 using LapTrinhMang.Models;
 using LapTrinhMang.Networking;
-using System.Text.Json;
-using OfficeOpenXml;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace LapTrinhMang
 {
@@ -38,16 +39,18 @@ namespace LapTrinhMang
 
             foreach (var may in dsMay)
             {
+                string hoTen = string.IsNullOrEmpty(may.HoTen) ? may.MSSV : $"{may.HoTen} ({may.MSSV})";
+
                 if (may.IsConnected)
                 {
                     var uc = new ucMayConnect();
-                    uc.SetInfo(may.MSSV, may.IP);
+                    uc.SetInfo(may.MSSV, may.IP, hoTen);
                     flpnDanhSachMay.Controls.Add(uc);
                 }
                 else
                 {
                     var uc = new ucMayDisconnect();
-                    uc.SetInfo(may.MSSV, may.IP);
+                    uc.SetInfo(may.MSSV, may.IP, hoTen);
                     flpnDanhSachMay.Controls.Add(uc);
                 }
             }
@@ -82,7 +85,7 @@ namespace LapTrinhMang
                     }
                     else // Thêm máy mới vào dsMay để theo dõi
                     {
-                        dsMay.Add(new ClientInfo { IP = ip, IsConnected = true, MSSV = "Mới/Chưa ĐD" });
+                        dsMay.Add(new ClientInfo { IP = ip, IsConnected = true, MSSV = "Mới/Chưa ĐD", HoTen = "Máy mới kết nối" });
                     }
                     try
                     {
@@ -141,6 +144,7 @@ namespace LapTrinhMang
                         {
                             may.MSSV = mssv;
                             may.IsConnected = true;
+                            may.HoTen = sv != null ? sv.HoTen : "Không tìm thấy tên";
                         }
 
                         if (sv != null)
@@ -199,24 +203,66 @@ namespace LapTrinhMang
                     }
                 }
             }
-            else if (ext == ".xlsx")
+            else if (ext == ".xlsx" || ext == ".xls") 
             {
-                OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                Excel.Application app = new Excel.Application();
+                Excel.Workbook wb = null;
+                Excel._Worksheet sheet = null;
+                Excel.Range range = null;
 
-                using (var package = new ExcelPackage(new FileInfo(filePath)))
+                try
                 {
-                    var ws = package.Workbook.Worksheets[0];
-                    int row = 2; // bỏ dòng tiêu đề
+                    app = new Excel.Application();
+                    wb = app.Workbooks.Open(filePath);
+                    sheet = wb.Sheets[1];
+                    range = sheet.UsedRange;
 
-                    while (ws.Cells[row, 1].Value != null)
+                    for (int row = 2; row <= range.Rows.Count; row++)
                     {
-                        list.Add(new Student
+                        // Đọc cột 1, 2, 3 tương ứng với MSSV, HoTen, Lop
+                        string mssv = (range.Cells[row, 1] as Excel.Range)?.Text;
+                        string hoTen = (range.Cells[row, 2] as Excel.Range)?.Text;
+                        string lop = (range.Cells[row, 3] as Excel.Range)?.Text;
+
+                        // Chỉ thêm vào danh sách nếu MSSV không rỗng
+                        if (!string.IsNullOrWhiteSpace(mssv))
                         {
-                            MSSV = ws.Cells[row, 1].Text.Trim(),
-                            HoTen = ws.Cells[row, 2].Text.Trim(),
-                            Lop = ws.Cells[row, 3].Text.Trim()
-                        });
-                        row++;
+                            list.Add(new Student
+                            {
+                                MSSV = mssv.Trim(),
+                                HoTen = hoTen != null ? hoTen.Trim() : "",
+                                Lop = lop != null ? lop.Trim() : ""
+                            });
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi đọc file Excel: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    list.Clear(); // Xóa danh sách nếu có lỗi
+                }
+                finally
+                {
+                    // Đảm bảo đóng và thoát Excel
+                    if (range != null)
+                    {
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(range);
+                    }
+                    if (sheet != null)
+                    {
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(sheet);
+                    }
+
+                    if (wb != null)
+                    {
+                        wb.Close(false);
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(wb);
+                    }
+
+                    if (app != null)
+                    {
+                        app.Quit();
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(app);
                     }
                 }
             }
