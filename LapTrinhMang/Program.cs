@@ -16,7 +16,7 @@ namespace LapTrinhMang
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FrmNhapIP());
+            Application.Run(new Server());
         }
     }
 }
