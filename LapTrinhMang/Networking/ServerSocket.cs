@@ -87,22 +87,29 @@ namespace LapTrinhMang.Networking
                 }
             }
         }
-
+        private string ReadHeader(NetworkStream stream)
+        {
+            List<byte> bytes = new List<byte>();
+            while (true)
+            {
+                int b = stream.ReadByte();
+                if (b == -1) throw new IOException("Client disconnected");
+                if (b == '\n') break;
+                bytes.Add((byte)b);
+            }
+            return Encoding.UTF8.GetString(bytes.ToArray());
+            
+        }
         private void ClientHandler(TcpClient client)
         {
             NetworkStream stream = client.GetStream();
             string clientIP = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
-
+            Console.WriteLine($"Client {clientIP} đã kết nối");
             try
             {
                 while (isRunning)
                 {
-                    byte[] headerBuffer = new byte[200];
-                    int headerBytes = stream.Read(headerBuffer, 0, headerBuffer.Length);
-                    if (headerBytes <= 0)
-                        break;
-
-                    string header = Encoding.UTF8.GetString(headerBuffer, 0, headerBytes);
+                    string header = ReadHeader(stream);
                     string[] parts = header.Split('|');
 
                     if (parts.Length < 2)
@@ -155,7 +162,11 @@ namespace LapTrinhMang.Networking
         {
             SendToAll("FILE", fileBytes);
         }
-
+        public void BroadcastLink(string link)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(link);
+            SendToAll("LINK", data);
+        }
         private void SendToAll(string type, byte[] data)
         {
             lock (clients)
@@ -164,9 +175,11 @@ namespace LapTrinhMang.Networking
                 {
                     try
                     {
+                        if (!client.Connected) continue;
+
                         NetworkStream stream = client.GetStream();
 
-                        string header = $"{type}|{data.Length}";
+                        string header = $"{type}|{data.Length}\n";
                         byte[] headerBytes = Encoding.UTF8.GetBytes(header);
 
                         stream.Write(headerBytes, 0, headerBytes.Length);

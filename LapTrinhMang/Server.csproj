@@ -135,6 +135,7 @@
     <Compile Include="UserControl\ucMayDisconnect.Designer.cs">
       <DependentUpon>ucMayDisconnect.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\ChonFile.cs" />
     <Compile Include="Utils\FileHelper.cs" />
     <EmbeddedResource Include="Form\FrmNhapIP.resx">
       <DependentUpon>FrmNhapIP.cs</DependentUpon>

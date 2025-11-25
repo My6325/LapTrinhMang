@@ -30,13 +30,13 @@
         {
             this.lblIPDau = new System.Windows.Forms.Label();
             this.lblIPCuoi = new System.Windows.Forms.Label();
-            this.txtIPDau = new System.Windows.Forms.TextBox();
             this.txtIPCuoi = new System.Windows.Forms.TextBox();
             this.txtSubnet = new System.Windows.Forms.TextBox();
             this.lblSubnet = new System.Windows.Forms.Label();
             this.txtSoMay = new System.Windows.Forms.TextBox();
             this.lblSoMay = new System.Windows.Forms.Label();
             this.btnConnect = new System.Windows.Forms.Button();
+            this.txtIPDau = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // lblIPDau
@@ -64,16 +64,6 @@
             this.lblIPCuoi.Size = new System.Drawing.Size(64, 20);
             this.lblIPCuoi.TabIndex = 1;
             this.lblIPCuoi.Text = "IP cuối:";
-            // 
-            // txtIPDau
-            // 
-            this.txtIPDau.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtIPDau.Location = new System.Drawing.Point(148, 32);
-            this.txtIPDau.Name = "txtIPDau";
-            this.txtIPDau.Size = new System.Drawing.Size(207, 28);
-            this.txtIPDau.TabIndex = 2;
             // 
             // txtIPCuoi
             // 
@@ -143,6 +133,16 @@
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
+            // txtIPDau
+            // 
+            this.txtIPDau.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtIPDau.Location = new System.Drawing.Point(148, 32);
+            this.txtIPDau.Name = "txtIPDau";
+            this.txtIPDau.Size = new System.Drawing.Size(207, 28);
+            this.txtIPDau.TabIndex = 2;
+            // 
             // FrmNhapIP
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
@@ -170,12 +170,12 @@
 
         private System.Windows.Forms.Label lblIPDau;
         private System.Windows.Forms.Label lblIPCuoi;
-        private System.Windows.Forms.TextBox txtIPDau;
         private System.Windows.Forms.TextBox txtIPCuoi;
         private System.Windows.Forms.TextBox txtSubnet;
         private System.Windows.Forms.Label lblSubnet;
         private System.Windows.Forms.TextBox txtSoMay;
         private System.Windows.Forms.Label lblSoMay;
         private System.Windows.Forms.Button btnConnect;
+        private System.Windows.Forms.TextBox txtIPDau;
     }
 }

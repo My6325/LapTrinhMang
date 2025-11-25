@@ -38,7 +38,7 @@
             this.btnChonGuiDT = new System.Windows.Forms.Button();
             this.btnChonLuuBT = new System.Windows.Forms.Button();
             this.gbDeThi = new System.Windows.Forms.GroupBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.lboxDSDeThi = new System.Windows.Forms.ListBox();
             this.btnThem = new System.Windows.Forms.Button();
             this.btnXoa = new System.Windows.Forms.Button();
             this.btnPhatDe = new System.Windows.Forms.Button();
@@ -126,6 +126,7 @@
             this.btnChonGuiDT.TabIndex = 7;
             this.btnChonGuiDT.Text = "Chọn";
             this.btnChonGuiDT.UseVisualStyleBackColor = true;
+            this.btnChonGuiDT.Click += new System.EventHandler(this.btnChonGuiDT_Click);
             // 
             // btnChonLuuBT
             // 
@@ -135,12 +136,13 @@
             this.btnChonLuuBT.TabIndex = 8;
             this.btnChonLuuBT.Text = "Chọn";
             this.btnChonLuuBT.UseVisualStyleBackColor = true;
+            this.btnChonLuuBT.Click += new System.EventHandler(this.btnChonLuuBT_Click);
             // 
             // gbDeThi
             // 
             this.gbDeThi.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.gbDeThi.Controls.Add(this.textBox1);
+            this.gbDeThi.Controls.Add(this.lboxDSDeThi);
             this.gbDeThi.Location = new System.Drawing.Point(16, 207);
             this.gbDeThi.Name = "gbDeThi";
             this.gbDeThi.Size = new System.Drawing.Size(423, 160);
@@ -148,14 +150,16 @@
             this.gbDeThi.TabStop = false;
             this.gbDeThi.Text = "Danh sách đề thi:";
             // 
-            // textBox1
+            // lboxDSDeThi
             // 
-            this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox1.Location = new System.Drawing.Point(3, 24);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(417, 133);
-            this.textBox1.TabIndex = 10;
+            this.lboxDSDeThi.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lboxDSDeThi.FormattingEnabled = true;
+            this.lboxDSDeThi.HorizontalScrollbar = true;
+            this.lboxDSDeThi.ItemHeight = 20;
+            this.lboxDSDeThi.Location = new System.Drawing.Point(3, 24);
+            this.lboxDSDeThi.Name = "lboxDSDeThi";
+            this.lboxDSDeThi.Size = new System.Drawing.Size(417, 133);
+            this.lboxDSDeThi.TabIndex = 0;
             // 
             // btnThem
             // 
@@ -166,6 +170,7 @@
             this.btnThem.TabIndex = 10;
             this.btnThem.Text = "Thêm";
             this.btnThem.UseVisualStyleBackColor = true;
+            this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
             // 
             // btnXoa
             // 
@@ -176,6 +181,7 @@
             this.btnXoa.TabIndex = 11;
             this.btnXoa.Text = "Xóa";
             this.btnXoa.UseVisualStyleBackColor = true;
+            this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
             // 
             // btnPhatDe
             // 
@@ -186,6 +192,7 @@
             this.btnPhatDe.TabIndex = 12;
             this.btnPhatDe.Text = "Phát đề";
             this.btnPhatDe.UseVisualStyleBackColor = true;
+            this.btnPhatDe.Click += new System.EventHandler(this.btnPhatDe_Click);
             // 
             // btnThuBai
             // 
@@ -196,6 +203,7 @@
             this.btnThuBai.TabIndex = 13;
             this.btnThuBai.Text = "Thu bài";
             this.btnThuBai.UseVisualStyleBackColor = true;
+            this.btnThuBai.Click += new System.EventHandler(this.btnThuBai_Click);
             // 
             // lblTG
             // 
@@ -286,8 +294,8 @@
             this.Name = "Server";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Server";
+            this.Load += new System.EventHandler(this.Server_Load);
             this.gbDeThi.ResumeLayout(false);
-            this.gbDeThi.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nupThoiGian)).EndInit();
             this.gbDSMay.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -307,7 +315,6 @@
         private System.Windows.Forms.Button btnChonGuiDT;
         private System.Windows.Forms.Button btnChonLuuBT;
         private System.Windows.Forms.GroupBox gbDeThi;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button btnThem;
         private System.Windows.Forms.Button btnXoa;
         private System.Windows.Forms.Button btnPhatDe;
@@ -318,6 +325,7 @@
         private System.Windows.Forms.Label lblDemTG;
         private System.Windows.Forms.GroupBox gbDSMay;
         private System.Windows.Forms.FlowLayoutPanel flpnDanhSachMay;
+        private System.Windows.Forms.ListBox lboxDSDeThi;
     }
 }
 

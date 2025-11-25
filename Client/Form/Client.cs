@@ -11,6 +11,9 @@ using System.Windows.Forms;
 using Client.Models;
 using Client.Networking;
 using System.Text.Json;
+using System.IO;
+using System.IO.Compression;
+using System.Threading;
 
 namespace Client
 {
@@ -22,6 +25,8 @@ namespace Client
 
         private List<StudentInfo> dsSinhVienClient = new List<StudentInfo>();
         private bool eventsRegistered = false;
+        private string currentFileName = "";
+        private string currentSavePath = "";
 
         private bool IsConnected => socket.IsConnected;
 
@@ -38,13 +43,14 @@ namespace Client
             cbTTSV.DataSource = null;
 
             UpdateUI(false);
+            currentSavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "DeThiBaiLam");
+           // Console.WriteLine($"Đề thi sẽ được lưu tại: {deThiPath}");
         }
 
         private void UpdateUI(bool connected)
         {
             btnConnect.Text = connected ? "Disconnect" : "Connect";
             btnĐiemDanh.Enabled = connected;
-            btnNopBai.Enabled = connected; // Giả sử nút Nộp bài tồn tại
             txtIP.Enabled = !connected;
 
             // Chỉ cho phép chọn TTSV khi đã kết nối và chưa điểm danh
@@ -100,6 +106,51 @@ namespace Client
                             }));
                         }
                     }
+                    else if (msg.StartsWith("SAVEPATH|")) 
+                    {
+                        currentSavePath = msg.Substring("SAVEPATH|".Length).Trim();
+                        Invoke(new Action(() =>
+                        {
+                            Console.WriteLine($"Đã nhận đường dẫn lưu: {currentSavePath}");
+                        }));
+                    }
+                    else if (msg.StartsWith("FILENAME|"))
+                    {
+                        // Lưu tên file để dùng khi nhận file
+                        currentFileName = msg.Substring("FILENAME|".Length);
+                        Invoke(new Action(() =>
+                        {
+                            Console.WriteLine($"Chuẩn bị nhận file: {currentFileName}");
+                        }));
+                    }
+                    else if (msg == "YEUCAU_NOPBAI")
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            SendBaiLamToServer();
+                        }));
+                    }
+                    else if (msg.StartsWith("BATDAU|"))
+                    {
+                        int soPhut = int.Parse(msg.Split('|')[1]);
+                        Invoke(new Action(() =>
+                        {
+                            MessageBox.Show($"Bài thi bắt đầu! Thời gian: {soPhut} phút", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }));
+                    }
+                    else if (msg.StartsWith("TIME|"))
+                    {
+                        double seconds = double.Parse(msg.Split('|')[1]);
+                        int phut = (int)(seconds / 60);
+                        int giay = (int)(seconds % 60);
+                    }
+                    else if (msg == "HETGIO")
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            MessageBox.Show("Đã hết thời gian làm bài!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }));
+                    }
                     else
                     {
                         Invoke(new Action(() =>
@@ -113,7 +164,29 @@ namespace Client
                 {
                     Invoke(new Action(() =>
                     {
-                        MessageBox.Show("Đã nhận file từ Server!");
+                        try
+                        {
+                            string folder = string.IsNullOrEmpty(currentSavePath)
+                                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DefaultDeThi") // Dùng Documents làm dự phòng
+                                : currentSavePath;
+                            if (!Directory.Exists(folder))
+                                Directory.CreateDirectory(folder);
+
+                            // Lưu file với tên đã nhận hoặc tên mặc định
+                            string fileName = string.IsNullOrEmpty(currentFileName)
+                                ? $"DeThi_{DateTime.Now:yyyyMMdd_HHmmss}.pdf"
+                                : currentFileName;
+
+                            string filePath = Path.Combine(folder, fileName);
+                            File.WriteAllBytes(filePath, fileBytes);
+
+                            currentFileName = "";
+                            //currentSavePath = "";
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Lỗi khi lưu file: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }));
                 };
 
@@ -194,6 +267,50 @@ namespace Client
                 }
             }
             return "127.0.0.1";
+        }
+        private void SendBaiLamToServer()
+        {
+            if (selectedStudent == null)
+            {
+                MessageBox.Show("Chưa chọn thông tin sinh viên để nộp bài", "Lỗi Nộp bài", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (!IsConnected) return;
+
+            string sourceFolder = currentSavePath;
+            string zipFileName = $"{selectedStudent.MSSV}_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
+
+            // Tạo đường dẫn file ZIP tạm thời (sử dụng thư mục Temp của hệ thống)
+            string tempZipPath = Path.Combine(Path.GetTempPath(), zipFileName);
+
+            if (string.IsNullOrEmpty(sourceFolder) || !Directory.Exists(sourceFolder))
+            {
+                MessageBox.Show($"Thư mục bài làm không tồn tại", "Lỗi Nén", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
+
+                // Thực hiện nén
+                ZipFile.CreateFromDirectory(sourceFolder, tempZipPath, CompressionLevel.Fastest, false);
+                socket.SendMessage($"NOPBAI_FILENAME|{zipFileName}");
+                Thread.Sleep(300);
+
+                //Gửi nội dung file ZIP
+                byte[] fileBytes = File.ReadAllBytes(tempZipPath);
+                socket.SendFile(fileBytes);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi gửi bài làm: {ex.Message}", "Lỗi ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            finally
+            {
+                if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
+            }
         }
     }
 }

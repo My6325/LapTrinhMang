@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,7 +13,9 @@ using System.Windows.Forms;
 using DocumentFormat.OpenXml.Spreadsheet;
 using LapTrinhMang.Models;
 using LapTrinhMang.Networking;
+using LapTrinhMang.Utils;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Threading;
 
 namespace LapTrinhMang
 {
@@ -21,6 +24,11 @@ namespace LapTrinhMang
         private List<ClientInfo> dsMay;
         private ServerSocket serverSocket = new ServerSocket();
         private List<Student> dsSinhVien = new List<Student>();
+        private Dictionary<string, string> duongDanDeThi = new Dictionary<string, string>();//ListBox hiển thị tên file, Dictionary lưu đường dẫn thật để gửi
+        private Dictionary<string, string> duongDanBaiLam = new Dictionary<string, string>(); 
+        private TimeSpan thoiGianConLai;
+        private System.Windows.Forms.Timer timerDemNguoc;
+
         public Server()
         {
             InitializeComponent();
@@ -158,7 +166,12 @@ namespace LapTrinhMang
 
                         LoadDanhSachMay();
                     }
-                    else
+                    else if (msg.StartsWith("NOPBAI_FILENAME|"))
+                    {
+                        string fileName = msg.Substring("NOPBAI_FILENAME|".Length).Trim();
+                        duongDanBaiLam[ip] = fileName; 
+                    }
+                    else 
                     {
                         MessageBox.Show($"[{ip}] gửi: {msg}");
                     }
@@ -170,9 +183,30 @@ namespace LapTrinhMang
             {
                 Invoke(new Action(() =>
                 {
-                    string path = "bai_" + ip.Replace(".", "_") + ".zip";
-                    System.IO.File.WriteAllBytes(path, bytes);
-                    //MessageBox.Show($"Đã nhận file từ {ip}");
+                    try
+                    {
+                        string saveFolder = txtLuuBaiThi.Text; 
+
+                        if (!Directory.Exists(saveFolder))
+                            Directory.CreateDirectory(saveFolder);
+
+                        string fileName = $"BaiLam_{ip.Replace(".", "_")}.zip";
+
+                        if (duongDanBaiLam.ContainsKey(ip))
+                        {
+                            fileName = duongDanBaiLam[ip];
+                            duongDanBaiLam.Remove(ip); // Xóa khỏi Dictionary sau khi sử dụng
+                        }
+
+                        string path = Path.Combine(saveFolder, fileName);
+                        File.WriteAllBytes(path, bytes);
+
+                        MessageBox.Show($"Đã nhận bài làm {fileName} từ {ip}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi khi lưu bài làm từ {ip}: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }));
             };
         }
@@ -310,6 +344,143 @@ namespace LapTrinhMang
                     MessageBox.Show("Lỗi gửi danh sách sinh viên cho Client: " + ex.Message);
                 }
             }
+        }
+
+        private void btnChonGuiDT_Click(object sender, EventArgs e)
+        {
+            string path = ChonFile.ChonThuMuc("Chọn thư mục để gửi đề thi");
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                txtGuiDeThi.Text = path;   // hiển thị đường dẫn gửi    
+            }
+        }
+
+        private void btnChonLuuBT_Click(object sender, EventArgs e)
+        {
+            string folder = ChonFile.ChonThuMuc("Chọn nơi lưu bài thi");
+
+            if (!string.IsNullOrEmpty(folder))
+                txtLuuBaiThi.Text = folder;//Hiển thị đường dẫn lưu
+        }
+
+        private void btnThem_Click(object sender, EventArgs e)
+        {
+            string filePath = ChonFile.ChonFileFromPC("Chọn đề thi");
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                string fileName = Path.GetFileName(filePath); // chỉ lấy tên file
+                lboxDSDeThi.Items.Add(fileName);
+
+                // Lưu đường dẫn thật vào Dictionary
+                duongDanDeThi[fileName] = filePath;
+            }
+        }
+
+        private void btnXoa_Click(object sender, EventArgs e)
+        {
+            if (lboxDSDeThi.SelectedIndex == -1) return;
+
+            string fileName = lboxDSDeThi.SelectedItem.ToString();
+
+            // Xóa khỏi ListBox
+            lboxDSDeThi.Items.Remove(fileName);
+
+            // Xóa khỏi dictionary
+            if (duongDanDeThi.ContainsKey(fileName))
+                duongDanDeThi.Remove(fileName);
+        }
+
+        private void btnPhatDe_Click(object sender, EventArgs e)
+        {
+            string linkDeThi = txtGuiDeThi.Text;
+            if (duongDanDeThi.Count == 0)
+            {
+                MessageBox.Show("Chưa có đề thi nào được thêm!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int soPhut = (int)nupThoiGian.Value;
+            if (soPhut <= 0)
+            {
+                MessageBox.Show("Thời gian phải lớn hơn 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            if (!string.IsNullOrEmpty(linkDeThi))
+            {
+                serverSocket.BroadcastMessage($"SAVEPATH|{linkDeThi}");
+                Thread.Sleep(500); // Đợi Client nhận đường dẫn
+            }
+
+            int count = 0;
+            foreach (var kvp in duongDanDeThi)
+            {
+                string fileName = kvp.Key;
+                string filePath = kvp.Value;
+
+                if (File.Exists(filePath))
+                {
+                    // Gửi tên file trước
+                    serverSocket.BroadcastMessage($"FILENAME|{fileName}");
+                    Thread.Sleep(300); // Đợi client nhận tên file
+
+                    // Sau đó gửi nội dung file
+                    byte[] bytes = File.ReadAllBytes(filePath);
+                    serverSocket.BroadcastFile(bytes);
+
+                    count++;
+                    Console.WriteLine($"Đã gửi file {count}/{duongDanDeThi.Count}: {fileName} ({bytes.Length} bytes)");
+
+                    Thread.Sleep(500); // Đợi giữa các file
+                }
+                else
+                {
+                    MessageBox.Show($"Không tìm thấy file: {filePath}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            // Tạo thời gian đếm ngược
+            thoiGianConLai = TimeSpan.FromMinutes(soPhut);
+            lblDemTG.Text = thoiGianConLai.ToString(@"hh\:mm\:ss");
+
+            // Gửi lệnh bắt đầu countdown
+            serverSocket.BroadcastMessage($"BATDAU|{soPhut}");
+            timerDemNguoc.Start();
+            MessageBox.Show($"Đã phát {duongDanDeThi.Count} đề thi!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        }
+
+        private void Server_Load(object sender, EventArgs e)
+        {
+            //Khởi tạo thời gian
+            timerDemNguoc = new System.Windows.Forms.Timer();
+            timerDemNguoc.Interval = 1000; 
+            timerDemNguoc.Tick += TimerDemNguoc_Tick;
+        }
+        private void TimerDemNguoc_Tick(object sender, EventArgs e)
+        {
+            thoiGianConLai = thoiGianConLai.Subtract(TimeSpan.FromSeconds(1));
+            lblDemTG.Text = thoiGianConLai.ToString(@"hh\:mm\:ss");
+            // Gửi thời gian còn lại cho client
+            serverSocket.BroadcastMessage($"TIME|{thoiGianConLai.TotalSeconds}");
+            // Nếu hết giờ
+            if (thoiGianConLai.TotalSeconds <= 0)
+            {
+                timerDemNguoc.Stop();
+                lblDemTG.Text = "00:00:00";
+                serverSocket.BroadcastMessage("HETGIO");
+                MessageBox.Show("Đã hết thời gian làm bài!", "Thông báo",MessageBoxButtons.OKCancel);
+            }
+        }
+
+        private void btnThuBai_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Đã gửi yêu cầu thu bài cho tất cả Client!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            timerDemNguoc.Stop();
+
+            lblDemTG.Text = "00:00:00";
+            serverSocket.BroadcastMessage("YEUCAU_NOPBAI");
+            thoiGianConLai = TimeSpan.FromSeconds(0);
         }
     }
 }

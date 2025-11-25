@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -49,13 +50,12 @@ namespace Client.Networking
             {
                 while (isConnected)
                 {
-                    byte[] headerBuffer = new byte[200];
-                    int headerBytes = stream.Read(headerBuffer, 0, headerBuffer.Length);
+                    string header = ReadHeader(stream); 
 
-                    if (headerBytes <= 0)
+                    if (string.IsNullOrEmpty(header))
+                    {
                         break;
-
-                    string header = Encoding.UTF8.GetString(headerBuffer, 0, headerBytes).Trim('\0');
+                    }
                     string[] parts = header.Split('|');
 
                     if (parts.Length < 2)
@@ -126,7 +126,7 @@ namespace Client.Networking
 
         private void SendPacket(string type, byte[] data)
         {
-            string header = $"{type}|{data.Length}";
+            string header = $"{type}|{data.Length}\n";
             byte[] headerBytes = Encoding.UTF8.GetBytes(header);
 
             stream.Write(headerBytes, 0, headerBytes.Length);
@@ -158,6 +158,58 @@ namespace Client.Networking
 
             }
             OnDisconnected?.Invoke();
+        }
+        private string ReadHeader(NetworkStream stream)
+        {
+            List<byte> bytes = new List<byte>();
+
+            try
+            {
+                while (true)
+                {
+                    // Kiểm tra xem stream còn mở không
+                    if (!client.Connected)
+                    {
+                        Console.WriteLine("Client đã ngắt kết nối");
+                        return null;
+                    }
+
+                    // Kiểm tra có dữ liệu không, nếu không thì đợi
+                    while (!stream.DataAvailable)
+                    {
+                        Thread.Sleep(50); 
+                        if (!client.Connected || !isConnected)
+                            return null;
+                    }
+
+                    int b = stream.ReadByte();
+
+                    if (b == -1)
+                    {
+                        Console.WriteLine("Stream trả về -1");
+                        return null;
+                    }
+
+                    if (b == '\n')
+                        break; // Ký tự kết thúc Header
+
+                    bytes.Add((byte)b);
+                }
+
+                string result = Encoding.UTF8.GetString(bytes.ToArray()).Trim();
+                Console.WriteLine($"Nhận header: {result}");
+                return result;
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"IOException trong ReadHeader: {ex.Message}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi trong ReadHeader: {ex.Message}");
+                return null;
+            }
         }
     }
 }

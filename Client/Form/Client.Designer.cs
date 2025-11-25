@@ -41,7 +41,8 @@
             this.lblLop = new System.Windows.Forms.Label();
             this.btnConnect = new System.Windows.Forms.Button();
             this.btnĐiemDanh = new System.Windows.Forms.Button();
-            this.btnNopBai = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtDeThi = new System.Windows.Forms.TextBox();
             this.gbTTSV.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -98,6 +99,8 @@
             this.gbTTSV.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbTTSV.Controls.Add(this.txtDeThi);
+            this.gbTTSV.Controls.Add(this.label1);
             this.gbTTSV.Controls.Add(this.txtHoTen);
             this.gbTTSV.Controls.Add(this.txtMSSV);
             this.gbTTSV.Controls.Add(this.txtLop);
@@ -106,7 +109,7 @@
             this.gbTTSV.Controls.Add(this.lblLop);
             this.gbTTSV.Location = new System.Drawing.Point(38, 129);
             this.gbTTSV.Name = "gbTTSV";
-            this.gbTTSV.Size = new System.Drawing.Size(449, 172);
+            this.gbTTSV.Size = new System.Drawing.Size(449, 214);
             this.gbTTSV.TabIndex = 4;
             this.gbTTSV.TabStop = false;
             this.gbTTSV.Text = "Thông tin sinh viên:";
@@ -194,7 +197,7 @@
             // btnĐiemDanh
             // 
             this.btnĐiemDanh.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnĐiemDanh.Location = new System.Drawing.Point(120, 329);
+            this.btnĐiemDanh.Location = new System.Drawing.Point(178, 370);
             this.btnĐiemDanh.Name = "btnĐiemDanh";
             this.btnĐiemDanh.Size = new System.Drawing.Size(111, 40);
             this.btnĐiemDanh.TabIndex = 6;
@@ -202,22 +205,35 @@
             this.btnĐiemDanh.UseVisualStyleBackColor = true;
             this.btnĐiemDanh.Click += new System.EventHandler(this.btnĐiemDanh_Click);
             // 
-            // btnNopBai
+            // label1
             // 
-            this.btnNopBai.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnNopBai.Location = new System.Drawing.Point(272, 329);
-            this.btnNopBai.Name = "btnNopBai";
-            this.btnNopBai.Size = new System.Drawing.Size(111, 40);
-            this.btnNopBai.TabIndex = 7;
-            this.btnNopBai.Text = "Nộp bài";
-            this.btnNopBai.UseVisualStyleBackColor = true;
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(18, 168);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 20);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Đề thi:";
+            // 
+            // txtDeThi
+            // 
+            this.txtDeThi.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtDeThi.Location = new System.Drawing.Point(116, 160);
+            this.txtDeThi.Multiline = true;
+            this.txtDeThi.Name = "txtDeThi";
+            this.txtDeThi.Size = new System.Drawing.Size(242, 28);
+            this.txtDeThi.TabIndex = 8;
             // 
             // Client
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(546, 396);
-            this.Controls.Add(this.btnNopBai);
+            this.ClientSize = new System.Drawing.Size(546, 438);
             this.Controls.Add(this.btnĐiemDanh);
             this.Controls.Add(this.btnConnect);
             this.Controls.Add(this.gbTTSV);
@@ -251,6 +267,7 @@
         private System.Windows.Forms.Label lblLop;
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.Button btnĐiemDanh;
-        private System.Windows.Forms.Button btnNopBai;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtDeThi;
     }
 }
