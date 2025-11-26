@@ -78,8 +78,8 @@ namespace LapTrinhMang
 
         private void StartServerAfterLoad()
         {
-            serverSocket.Start(8888);
-            MessageBox.Show("Server đã khởi động (port 8888)!");
+            int port = 8888;
+            serverSocket.Start(port);
 
             // Khi client kết nối
             serverSocket.OnClientConnected += (ip) =>
@@ -154,6 +154,11 @@ namespace LapTrinhMang
                             may.IsConnected = true;
                             may.HoTen = sv != null ? sv.HoTen : "Không tìm thấy tên";
                         }
+
+                        // Ghi log điểm danh
+                        string hoTen = sv != null ? sv.HoTen : "Không tìm thấy tên";
+                        string lop = sv != null ? sv.Lop : "N/A";
+                        LogDiemDanh(mssv, hoTen, lop);
 
                         if (sv != null)
                         {
@@ -452,11 +457,16 @@ namespace LapTrinhMang
 
         private void Server_Load(object sender, EventArgs e)
         {
+            int port = 8888;
+            string localIp = GetLocalIPAddress();
+            this.Text = $"Server is running at: {localIp}:{port}";
+
             //Khởi tạo thời gian
             timerDemNguoc = new System.Windows.Forms.Timer();
             timerDemNguoc.Interval = 1000; 
             timerDemNguoc.Tick += TimerDemNguoc_Tick;
         }
+
         private void TimerDemNguoc_Tick(object sender, EventArgs e)
         {
             thoiGianConLai = thoiGianConLai.Subtract(TimeSpan.FromSeconds(1));
@@ -481,6 +491,75 @@ namespace LapTrinhMang
             lblDemTG.Text = "00:00:00";
             serverSocket.BroadcastMessage("YEUCAU_NOPBAI");
             thoiGianConLai = TimeSpan.FromSeconds(0);
+        }
+
+        private void LogDiemDanh(string mssv, string hoTen, string lop)
+        {
+            try
+            {
+                //1. Tạo tên file log: DiemDanh-ddMMyyyy.txt
+                string today = DateTime.Now.ToString("ddMMyyyy");
+                string logFileName = $"DiemDanh-{today}.txt";
+
+                string currentDir = Directory.GetCurrentDirectory();
+                string solutionDir = Path.GetFullPath(Path.Combine(currentDir, @"..\..\.."));
+
+                string logFilePath = Path.Combine(solutionDir, logFileName); // Lưu tại thư mục chạy của Server
+
+                //2. Định dạng nội dung log: MSSV, Tên, Lớp, Giờ điểm danh
+                string logTime = DateTime.Now.ToString("HH:mm:ss");
+                string logEntry = $"{mssv},{hoTen},{lop},{logTime}";
+
+                //3. Kiểm tra và tạo header nếu file chưa tồn tại
+                if (!File.Exists(logFilePath))
+                {
+                    string header = "MSSV,HoTen,Lop,GioDiemDanh\n";
+                    File.WriteAllText(logFilePath, header);
+                }
+
+                //4. Ghi nội dung log vào file (append)
+                File.AppendAllText(logFilePath, logEntry + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                // Bắt lỗi nếu có vấn đề khi ghi file
+                MessageBox.Show($"Lỗi khi ghi log điểm danh: {ex.Message}", "Lỗi Log", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnDisConnect_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                serverSocket.Stop();
+                MessageBox.Show("Server đã ngắt kết nối!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Dừng bộ đếm thời gian nếu nó đang chạy
+                if (timerDemNguoc != null && timerDemNguoc.Enabled)
+                {
+                    timerDemNguoc.Stop();
+                    lblDemTG.Text = "00:00:00";
+                    thoiGianConLai = TimeSpan.FromSeconds(0);
+                }
+
+                // Cập nhật trạng thái các máy con trên giao diện là "Disconnect"
+                foreach (var may in dsMay)
+                    may.IsConnected = false;
+                LoadDanhSachMay();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi ngắt kết nối Server: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string GetLocalIPAddress()
+        {
+            var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    return ip.ToString();
+            return "127.0.0.1"; // Địa chỉ Loopback nếu không tìm thấy IP cục bộ
         }
     }
 }

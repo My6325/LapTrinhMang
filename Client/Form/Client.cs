@@ -180,6 +180,12 @@ namespace Client
                             string filePath = Path.Combine(folder, fileName);
                             File.WriteAllBytes(filePath, fileBytes);
 
+                            string displayFileName = Path.GetFileName(fileName);
+                            Invoke(new Action(() =>
+                            {
+                                txtDeThi.Text = displayFileName;
+                            }));
+
                             currentFileName = "";
                             //currentSavePath = "";
                         }

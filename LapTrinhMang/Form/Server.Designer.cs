@@ -74,6 +74,7 @@
             this.btnDisConnect.TabIndex = 1;
             this.btnDisConnect.Text = "Ngắt kết nối Server";
             this.btnDisConnect.UseVisualStyleBackColor = true;
+            this.btnDisConnect.Click += new System.EventHandler(this.btnDisConnect_Click);
             // 
             // btnLayDS
             // 
