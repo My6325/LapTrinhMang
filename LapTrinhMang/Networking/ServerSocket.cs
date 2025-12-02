@@ -14,6 +14,7 @@ namespace LapTrinhMang.Networking
         private bool isRunning = false;
 
         private readonly List<TcpClient> clients = new List<TcpClient>();
+        private readonly Dictionary<string, TcpClient> clientByIP = new Dictionary<string, TcpClient>();
 
         public event Action<string> OnClientConnected;
         public event Action<string> OnClientDisconnected;
@@ -70,13 +71,17 @@ namespace LapTrinhMang.Networking
                 {
                     TcpClient client = listener.AcceptTcpClient();
 
-                    lock (clients)
-                        clients.Add(client);
-
                     string ip = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
+                    
+                    lock (clients)
+                    {
+                        clients.Add(client);
+                        clientByIP[ip] = client;
+                    }
+
                     OnClientConnected?.Invoke(ip);
 
-                    Thread clientThread = new Thread(() => ClientHandler(client));
+                    Thread clientThread = new Thread(() => ClientHandler(client, ip));
                     clientThread.IsBackground = true;
                     clientThread.Start();
                 }
@@ -100,10 +105,9 @@ namespace LapTrinhMang.Networking
             return Encoding.UTF8.GetString(bytes.ToArray());
             
         }
-        private void ClientHandler(TcpClient client)
+        private void ClientHandler(TcpClient client, string clientIP)
         {
             NetworkStream stream = client.GetStream();
-            string clientIP = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
             Console.WriteLine($"Client {clientIP} đã kết nối");
             try
             {
@@ -147,6 +151,8 @@ namespace LapTrinhMang.Networking
             lock (clients)
             {
                 clients.Remove(client);
+                if (clientByIP.ContainsKey(clientIP))
+                    clientByIP.Remove(clientIP);
             }
 
             OnClientDisconnected?.Invoke(clientIP);
@@ -167,6 +173,50 @@ namespace LapTrinhMang.Networking
             byte[] data = Encoding.UTF8.GetBytes(link);
             SendToAll("LINK", data);
         }
+
+        public void SendMessageToClient(string ip, string msg)
+        {
+            byte[] msgBytes = Encoding.UTF8.GetBytes(msg);
+            SendToClient(ip, "MSG", msgBytes);
+        }
+
+        public void SendFileToClient(string ip, byte[] fileBytes)
+        {
+            SendToClient(ip, "FILE", fileBytes);
+        }
+
+        private void SendToClient(string ip, string type, byte[] data)
+        {
+            lock (clients)
+            {
+                if (!clientByIP.ContainsKey(ip))
+                {
+                    throw new Exception($"Không tìm thấy client với IP: {ip}");
+                }
+
+                TcpClient client = clientByIP[ip];
+                try
+                {
+                    if (!client.Connected)
+                    {
+                        throw new Exception($"Client {ip} đã ngắt kết nối");
+                    }
+
+                    NetworkStream stream = client.GetStream();
+
+                    string header = $"{type}|{data.Length}\n";
+                    byte[] headerBytes = Encoding.UTF8.GetBytes(header);
+
+                    stream.Write(headerBytes, 0, headerBytes.Length);
+                    stream.Write(data, 0, data.Length);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Lỗi khi gửi tin nhắn đến {ip}: {ex.Message}");
+                }
+            }
+        }
+
         private void SendToAll(string type, byte[] data)
         {
             lock (clients)

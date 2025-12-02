@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.btnConnect = new System.Windows.Forms.Button();
             this.btnDisConnect = new System.Windows.Forms.Button();
             this.btnLayDS = new System.Windows.Forms.Button();
@@ -49,9 +50,14 @@
             this.lblDemTG = new System.Windows.Forms.Label();
             this.gbDSMay = new System.Windows.Forms.GroupBox();
             this.flpnDanhSachMay = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnGuiTN = new System.Windows.Forms.Button();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyDữLiệuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gửiTinNhắnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gbDeThi.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nupThoiGian)).BeginInit();
             this.gbDSMay.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnConnect
@@ -266,6 +272,40 @@
             this.flpnDanhSachMay.Size = new System.Drawing.Size(988, 503);
             this.flpnDanhSachMay.TabIndex = 0;
             // 
+            // btnGuiTN
+            // 
+            this.btnGuiTN.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnGuiTN.Location = new System.Drawing.Point(312, 440);
+            this.btnGuiTN.Name = "btnGuiTN";
+            this.btnGuiTN.Size = new System.Drawing.Size(124, 33);
+            this.btnGuiTN.TabIndex = 13;
+            this.btnGuiTN.Text = "Gửi tin nhắn";
+            this.btnGuiTN.UseVisualStyleBackColor = true;
+            this.btnGuiTN.Click += new System.EventHandler(this.btnGuiTinNhan_Click);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyDữLiệuToolStripMenuItem,
+            this.gửiTinNhắnToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(163, 52);
+            // 
+            // copyDữLiệuToolStripMenuItem
+            // 
+            this.copyDữLiệuToolStripMenuItem.Name = "copyDữLiệuToolStripMenuItem";
+            this.copyDữLiệuToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+            this.copyDữLiệuToolStripMenuItem.Text = "Copy dữ liệu";
+            this.copyDữLiệuToolStripMenuItem.Click += new System.EventHandler(this.copyDữLiệuToolStripMenuItem_Click);
+            // 
+            // gửiTinNhắnToolStripMenuItem
+            // 
+            this.gửiTinNhắnToolStripMenuItem.Name = "gửiTinNhắnToolStripMenuItem";
+            this.gửiTinNhắnToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+            this.gửiTinNhắnToolStripMenuItem.Text = "Gửi tin nhắn";
+            this.gửiTinNhắnToolStripMenuItem.Click += new System.EventHandler(this.gửiTinNhắnToolStripMenuItem_Click);
+            // 
             // Server
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
@@ -276,6 +316,7 @@
             this.Controls.Add(this.lblTGConLai);
             this.Controls.Add(this.nupThoiGian);
             this.Controls.Add(this.lblTG);
+            this.Controls.Add(this.btnGuiTN);
             this.Controls.Add(this.btnThuBai);
             this.Controls.Add(this.btnPhatDe);
             this.Controls.Add(this.btnXoa);
@@ -299,6 +340,7 @@
             this.gbDeThi.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.nupThoiGian)).EndInit();
             this.gbDSMay.ResumeLayout(false);
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -327,6 +369,10 @@
         private System.Windows.Forms.GroupBox gbDSMay;
         private System.Windows.Forms.FlowLayoutPanel flpnDanhSachMay;
         private System.Windows.Forms.ListBox lboxDSDeThi;
+        private System.Windows.Forms.Button btnGuiTN;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem copyDữLiệuToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gửiTinNhắnToolStripMenuItem;
     }
 }
 

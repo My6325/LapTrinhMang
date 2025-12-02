@@ -106,6 +106,18 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Form\CopyDuLieu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\CopyDuLieu.Designer.cs">
+      <DependentUpon>CopyDuLieu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form\GuiTinNhanClients.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\GuiTinNhanClients.Designer.cs">
+      <DependentUpon>GuiTinNhanClients.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form\FrmNhapIP.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -137,8 +149,14 @@
     </Compile>
     <Compile Include="Utils\ChonFile.cs" />
     <Compile Include="Utils\FileHelper.cs" />
+    <EmbeddedResource Include="Form\CopyDuLieu.resx">
+      <DependentUpon>CopyDuLieu.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form\FrmNhapIP.resx">
       <DependentUpon>FrmNhapIP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\GuiTinNhanClients.resx">
+      <DependentUpon>GuiTinNhanClients.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

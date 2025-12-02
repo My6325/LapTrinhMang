@@ -44,6 +44,7 @@
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
+            this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ucMayDisconnect_MouseUp);
             // 
             // txtMSSV
             // 
@@ -56,6 +57,7 @@
             this.txtMSSV.TabIndex = 1;
             this.txtMSSV.Text = "....";
             this.txtMSSV.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtMSSV.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ucMayDisconnect_MouseUp);
             // 
             // txtIP
             // 
@@ -68,6 +70,7 @@
             this.txtIP.TabIndex = 2;
             this.txtIP.Text = "IP: ...";
             this.txtIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtIP.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ucMayDisconnect_MouseUp);
             // 
             // ucMayDisconnect
             // 
@@ -81,6 +84,7 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ucMayDisconnect";
             this.Size = new System.Drawing.Size(150, 200);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ucMayDisconnect_MouseUp);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

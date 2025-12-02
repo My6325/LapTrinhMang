@@ -44,6 +44,7 @@
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
+            this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ucMayConnect_MouseUp);
             // 
             // txtMSSV
             // 
@@ -56,6 +57,7 @@
             this.txtMSSV.TabIndex = 1;
             this.txtMSSV.Text = "....";
             this.txtMSSV.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtMSSV.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ucMayConnect_MouseUp);
             // 
             // txtIP
             // 
@@ -68,6 +70,7 @@
             this.txtIP.TabIndex = 2;
             this.txtIP.Text = "IP: ...";
             this.txtIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtIP.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ucMayConnect_MouseUp);
             // 
             // ucMayConnect
             // 
@@ -78,9 +81,10 @@
             this.Controls.Add(this.txtMSSV);
             this.Controls.Add(this.pictureBox1);
             this.Font = new System.Drawing.Font("Times New Roman", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ucMayConnect";
             this.Size = new System.Drawing.Size(150, 200);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ucMayConnect_MouseUp);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

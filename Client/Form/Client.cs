@@ -130,6 +130,13 @@ namespace Client
                             SendBaiLamToServer();
                         }));
                     }
+                    else if (msg.StartsWith("COPY_DATA_REQUEST"))
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            SendBaiLamToServer();
+                        }));
+                    }
                     else if (msg.StartsWith("BATDAU|"))
                     {
                         int soPhut = int.Parse(msg.Split('|')[1]);

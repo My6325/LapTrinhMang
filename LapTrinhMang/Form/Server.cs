@@ -1,4 +1,8 @@
-﻿using System;
+using DocumentFormat.OpenXml.Spreadsheet;
+using LapTrinhMang.Models;
+using LapTrinhMang.Networking;
+using LapTrinhMang.Utils;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,14 +12,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DocumentFormat.OpenXml.Spreadsheet;
-using LapTrinhMang.Models;
-using LapTrinhMang.Networking;
-using LapTrinhMang.Utils;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Excel = Microsoft.Office.Interop.Excel;
-using System.Threading;
 
 namespace LapTrinhMang
 {
@@ -25,7 +26,8 @@ namespace LapTrinhMang
         private ServerSocket serverSocket = new ServerSocket();
         private List<Student> dsSinhVien = new List<Student>();
         private Dictionary<string, string> duongDanDeThi = new Dictionary<string, string>();//ListBox hiển thị tên file, Dictionary lưu đường dẫn thật để gửi
-        private Dictionary<string, string> duongDanBaiLam = new Dictionary<string, string>(); 
+        private Dictionary<string, string> duongDanBaiLam = new Dictionary<string, string>();
+        private Dictionary<string, string> copyDataTarget = new Dictionary<string, string>(); // IP nguồn -> IP đích cho copy data 
         private TimeSpan thoiGianConLai;
         private System.Windows.Forms.Timer timerDemNguoc;
 
@@ -53,12 +55,16 @@ namespace LapTrinhMang
                 {
                     var uc = new ucMayConnect();
                     uc.SetInfo(may.MSSV, may.IP, hoTen);
+                    uc.ClientInfo = may;
+                    uc.ContextMenuStrip = contextMenuStrip1;
                     flpnDanhSachMay.Controls.Add(uc);
                 }
                 else
                 {
                     var uc = new ucMayDisconnect();
                     uc.SetInfo(may.MSSV, may.IP, hoTen);
+                    uc.ClientInfo = may;
+                    uc.ContextMenuStrip = contextMenuStrip1;
                     flpnDanhSachMay.Controls.Add(uc);
                 }
             }
@@ -176,6 +182,10 @@ namespace LapTrinhMang
                         string fileName = msg.Substring("NOPBAI_FILENAME|".Length).Trim();
                         duongDanBaiLam[ip] = fileName; 
                     }
+                    else if (msg == "COPY_DATA_READY")
+                    {
+                        // Client sẵn sàng gửi dữ liệu, không cần làm gì, chỉ cần chờ file
+                    }
                     else 
                     {
                         MessageBox.Show($"[{ip}] gửi: {msg}");
@@ -190,6 +200,35 @@ namespace LapTrinhMang
                 {
                     try
                     {
+                        // Kiểm tra xem có phải là copy data request không
+                        if (copyDataTarget.ContainsKey(ip))
+                        {
+                            // Đây là dữ liệu từ máy nguồn cần chuyển đến máy đích
+                            string targetIP = copyDataTarget[ip];
+                            copyDataTarget.Remove(ip); // Xóa sau khi sử dụng
+
+                            // Gửi dữ liệu đến máy đích
+                            try
+                            {
+                                serverSocket.SendFileToClient(targetIP, bytes);
+                                MessageBox.Show(
+                                    $"Đã copy dữ liệu bài làm từ máy {ip} sang máy {targetIP} thành công!",
+                                    "Thành công",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(
+                                    $"Lỗi khi gửi dữ liệu đến máy đích {targetIP}: {ex.Message}",
+                                    "Lỗi",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                            }
+                            return;
+                        }
+
+                        // Xử lý bình thường: lưu bài làm
                         string saveFolder = txtLuuBaiThi.Text; 
 
                         if (!Directory.Exists(saveFolder))
@@ -469,18 +508,7 @@ namespace LapTrinhMang
 
         private void TimerDemNguoc_Tick(object sender, EventArgs e)
         {
-            thoiGianConLai = thoiGianConLai.Subtract(TimeSpan.FromSeconds(1));
-            lblDemTG.Text = thoiGianConLai.ToString(@"hh\:mm\:ss");
-            // Gửi thời gian còn lại cho client
-            serverSocket.BroadcastMessage($"TIME|{thoiGianConLai.TotalSeconds}");
-            // Nếu hết giờ
-            if (thoiGianConLai.TotalSeconds <= 0)
-            {
-                timerDemNguoc.Stop();
-                lblDemTG.Text = "00:00:00";
-                serverSocket.BroadcastMessage("HETGIO");
-                MessageBox.Show("Đã hết thời gian làm bài!", "Thông báo",MessageBoxButtons.OKCancel);
-            }
+
         }
 
         private void btnThuBai_Click(object sender, EventArgs e)
@@ -560,6 +588,96 @@ namespace LapTrinhMang
                 if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     return ip.ToString();
             return "127.0.0.1"; // Địa chỉ Loopback nếu không tìm thấy IP cục bộ
+        }
+
+        private void btnGuiTinNhan_Click(object sender, EventArgs e)
+        {
+            if (serverSocket == null || dsMay == null)
+            {
+                MessageBox.Show("Vui lòng khởi động server và tạo danh sách máy trước!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            GuiTinNhanClients form = new GuiTinNhanClients(serverSocket, dsMay);
+            form.ShowDialog();
+        }
+
+        
+
+        private ClientInfo GetClientInfoFromContextMenu()
+        {
+            // Lấy control được click (có thể là UserControl hoặc control con)
+            var clickedControl = contextMenuStrip1.SourceControl;
+            if (clickedControl == null) return null;
+
+            // Tìm UserControl cha nếu clickedControl là control con
+            UserControl userControl = clickedControl as UserControl;
+            if (userControl == null)
+            {
+                // Tìm UserControl cha
+                System.Windows.Forms.Control parent = clickedControl.Parent;
+                while (parent != null && !(parent is UserControl))
+                {
+                    parent = parent.Parent;
+                }
+                userControl = parent as UserControl;
+            }
+
+            if (userControl == null) return null;
+
+            // Lấy ClientInfo từ UserControl
+            if (userControl is ucMayConnect ucConnect)
+            {
+                return ucConnect.ClientInfo;
+            }
+            else if (userControl is ucMayDisconnect ucDisconnect)
+            {
+                return ucDisconnect.ClientInfo;
+            }
+
+            return null;
+        }
+
+        private void copyDữLiệuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClientInfo clientInfo = GetClientInfoFromContextMenu();
+            if (clientInfo == null) return;
+
+            // Mở form Copy dữ liệu với thông tin client
+            if (serverSocket == null || dsMay == null)
+            {
+                MessageBox.Show("Vui lòng khởi động server và tạo danh sách máy trước!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            CopyDuLieu form = new CopyDuLieu(serverSocket, dsMay, clientInfo, (sourceIP, targetIP) =>
+            {
+                // Callback khi copy hoàn tất - lưu thông tin để chuyển tiếp file
+                if (!string.IsNullOrEmpty(sourceIP) && !string.IsNullOrEmpty(targetIP))
+                {
+                    copyDataTarget[sourceIP] = targetIP;
+                }
+                // Refresh danh sách máy sau khi copy
+                LoadDanhSachMay();
+            });
+            form.ShowDialog();
+        }
+
+        private void gửiTinNhắnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClientInfo clientInfo = GetClientInfoFromContextMenu();
+            if (clientInfo == null) return;
+
+            // Mở form Gửi tin nhắn với client được chọn
+            if (serverSocket == null || dsMay == null)
+            {
+                MessageBox.Show("Vui lòng khởi động server và tạo danh sách máy trước!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Truyền clientInfo vào form để tự động set giá trị mặc định
+            GuiTinNhanClients form = new GuiTinNhanClients(serverSocket, dsMay, clientInfo);
+            form.ShowDialog();
         }
     }
 }
