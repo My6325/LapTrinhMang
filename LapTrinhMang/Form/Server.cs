@@ -30,7 +30,7 @@ namespace LapTrinhMang
         private Dictionary<string, string> copyDataTarget = new Dictionary<string, string>(); // IP nguồn -> IP đích cho copy data 
         private TimeSpan thoiGianConLai;
         private System.Windows.Forms.Timer timerDemNguoc;
-
+        private DanhSachDiemDanh formDSDD = null;
         public Server()
         {
             InitializeComponent();
@@ -166,16 +166,19 @@ namespace LapTrinhMang
                         string lop = sv != null ? sv.Lop : "N/A";
                         LogDiemDanh(mssv, hoTen, lop);
 
-                        if (sv != null)
-                        {
-                            MessageBox.Show($"Sinh viên {sv.HoTen} ({sv.MSSV} - {sv.Lop}) đã điểm danh tại IP {ip}!");
-                        }
-                        else
-                        {
-                            MessageBox.Show($"MSSV {mssv} đã điểm danh tại IP {ip} (không tìm thấy trong danh sách).");
-                        }
+                        //if (sv != null)
+                        //{
+                        //    MessageBox.Show($"Sinh viên {sv.HoTen} ({sv.MSSV} - {sv.Lop}) đã điểm danh tại IP {ip}!");
+                        //}
+                        //else
+                        //{
+                        //    MessageBox.Show($"MSSV {mssv} đã điểm danh tại IP {ip} (không tìm thấy trong danh sách).");
+                        //}
 
                         LoadDanhSachMay();
+
+                        if (formDSDD != null && !formDSDD.IsDisposed)
+                            formDSDD.LoadLogDiemDanh();
                     }
                     else if (msg.StartsWith("NOPBAI_FILENAME|"))
                     {
@@ -678,6 +681,18 @@ namespace LapTrinhMang
             // Truyền clientInfo vào form để tự động set giá trị mặc định
             GuiTinNhanClients form = new GuiTinNhanClients(serverSocket, dsMay, clientInfo);
             form.ShowDialog();
+        }
+
+        private void btnXemDSDD_Click(object sender, EventArgs e)
+        {
+            if (formDSDD == null || formDSDD.IsDisposed)
+            {
+                formDSDD = new DanhSachDiemDanh();
+                formDSDD.FormClosed += (s, args) => formDSDD = null;
+                formDSDD.Show();
+            }
+            else
+                formDSDD.Activate();
         }
     }
 }

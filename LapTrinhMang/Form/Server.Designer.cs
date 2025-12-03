@@ -54,6 +54,7 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyDữLiệuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gửiTinNhắnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnXemDSDD = new System.Windows.Forms.Button();
             this.gbDeThi.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nupThoiGian)).BeginInit();
             this.gbDSMay.SuspendLayout();
@@ -275,7 +276,7 @@
             // btnGuiTN
             // 
             this.btnGuiTN.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnGuiTN.Location = new System.Drawing.Point(312, 440);
+            this.btnGuiTN.Location = new System.Drawing.Point(298, 436);
             this.btnGuiTN.Name = "btnGuiTN";
             this.btnGuiTN.Size = new System.Drawing.Size(124, 33);
             this.btnGuiTN.TabIndex = 13;
@@ -306,11 +307,23 @@
             this.gửiTinNhắnToolStripMenuItem.Text = "Gửi tin nhắn";
             this.gửiTinNhắnToolStripMenuItem.Click += new System.EventHandler(this.gửiTinNhắnToolStripMenuItem_Click);
             // 
+            // btnXemDSDD
+            // 
+            this.btnXemDSDD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnXemDSDD.Location = new System.Drawing.Point(278, 484);
+            this.btnXemDSDD.Name = "btnXemDSDD";
+            this.btnXemDSDD.Size = new System.Drawing.Size(164, 33);
+            this.btnXemDSDD.TabIndex = 19;
+            this.btnXemDSDD.Text = "Xem DS điểm danh";
+            this.btnXemDSDD.UseVisualStyleBackColor = true;
+            this.btnXemDSDD.Click += new System.EventHandler(this.btnXemDSDD_Click);
+            // 
             // Server
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1451, 562);
+            this.Controls.Add(this.btnXemDSDD);
             this.Controls.Add(this.gbDSMay);
             this.Controls.Add(this.lblDemTG);
             this.Controls.Add(this.lblTGConLai);
@@ -373,6 +386,7 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem copyDữLiệuToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gửiTinNhắnToolStripMenuItem;
+        private System.Windows.Forms.Button btnXemDSDD;
     }
 }
 
