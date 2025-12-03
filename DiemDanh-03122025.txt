@@ -1,0 +1,3 @@
+MSSV,HoTen,Lop,GioDiemDanh
+12345,Khoa,CTK47A,15:21:23
+12345,Khoa,CTK47A,15:28:09

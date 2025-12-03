@@ -134,7 +134,7 @@ namespace Client
                     {
                         Invoke(new Action(() =>
                         {
-                            SendBaiLamToServer();
+                            SendCopyDataToServer();
                         }));
                     }
                     else if (msg.StartsWith("BATDAU|"))
@@ -326,6 +326,80 @@ namespace Client
             finally
             {
                 if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
+            }
+        }
+
+        /// <summary>
+        /// Gửi dữ liệu copy: bài làm (ZIP) và các file từ thư mục phát đề
+        /// </summary>
+        private void SendCopyDataToServer()
+        {
+            if (selectedStudent == null)
+            {
+                MessageBox.Show("Chưa chọn thông tin sinh viên để copy dữ liệu", "Lỗi Copy", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (!IsConnected) return;
+
+            string sourceFolder = currentSavePath;
+
+            if (string.IsNullOrEmpty(sourceFolder) || !Directory.Exists(sourceFolder))
+            {
+                MessageBox.Show($"Thư mục phát đề không tồn tại", "Lỗi Copy", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                // 1. Gửi bài làm (file ZIP)
+                string zipFileName = $"{selectedStudent.MSSV}_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
+                string tempZipPath = Path.Combine(Path.GetTempPath(), zipFileName);
+
+                if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
+
+                // Thực hiện nén
+                ZipFile.CreateFromDirectory(sourceFolder, tempZipPath, CompressionLevel.Fastest, false);
+                socket.SendMessage($"NOPBAI_FILENAME|{zipFileName}");
+                Thread.Sleep(300);
+
+                // Gửi nội dung file ZIP
+                byte[] fileBytes = File.ReadAllBytes(tempZipPath);
+                socket.SendFile(fileBytes);
+                Thread.Sleep(500); // Đợi server xử lý
+
+                // Xóa file ZIP tạm
+                if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
+
+                // 2. Gửi các file đề thi từ thư mục phát đề
+                string[] files = Directory.GetFiles(sourceFolder);
+                int fileCount = 0;
+
+                foreach (string filePath in files)
+                {
+                    // Bỏ qua file ZIP nếu có
+                    if (Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    string fileName = Path.GetFileName(filePath);
+                    byte[] fileData = File.ReadAllBytes(filePath);
+
+                    // Gửi tên file trước
+                    socket.SendMessage($"FILENAME|{fileName}");
+                    Thread.Sleep(300);
+
+                    // Gửi nội dung file
+                    socket.SendFile(fileData);
+                    Thread.Sleep(500); // Đợi giữa các file
+
+                    fileCount++;
+                }
+
+                // 3. Gửi tín hiệu hoàn thành copy
+                socket.SendMessage("COPY_DATA_COMPLETE");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi gửi dữ liệu copy: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

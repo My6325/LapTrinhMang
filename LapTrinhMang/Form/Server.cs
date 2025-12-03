@@ -27,7 +27,8 @@ namespace LapTrinhMang
         private List<Student> dsSinhVien = new List<Student>();
         private Dictionary<string, string> duongDanDeThi = new Dictionary<string, string>();//ListBox hiển thị tên file, Dictionary lưu đường dẫn thật để gửi
         private Dictionary<string, string> duongDanBaiLam = new Dictionary<string, string>();
-        private Dictionary<string, string> copyDataTarget = new Dictionary<string, string>(); // IP nguồn -> IP đích cho copy data 
+        private Dictionary<string, string> copyDataTarget = new Dictionary<string, string>(); // IP nguồn -> IP đích cho copy data
+        private Dictionary<string, string> copyDataFileName = new Dictionary<string, string>(); // IP nguồn -> tên file hiện tại đang copy 
         private TimeSpan thoiGianConLai;
         private System.Windows.Forms.Timer timerDemNguoc;
         private DanhSachDiemDanh formDSDD = null;
@@ -183,11 +184,48 @@ namespace LapTrinhMang
                     else if (msg.StartsWith("NOPBAI_FILENAME|"))
                     {
                         string fileName = msg.Substring("NOPBAI_FILENAME|".Length).Trim();
-                        duongDanBaiLam[ip] = fileName; 
+                        duongDanBaiLam[ip] = fileName;
+                        // Nếu đang trong quá trình copy, lưu tên file này
+                        if (copyDataTarget.ContainsKey(ip))
+                        {
+                            copyDataFileName[ip] = fileName;
+                        }
+                    }
+                    else if (msg.StartsWith("FILENAME|"))
+                    {
+                        // Nhận tên file từ máy nguồn trong quá trình copy
+                        if (copyDataTarget.ContainsKey(ip))
+                        {
+                            string fileName = msg.Substring("FILENAME|".Length).Trim();
+                            copyDataFileName[ip] = fileName;
+                        }
                     }
                     else if (msg == "COPY_DATA_READY")
                     {
                         // Client sẵn sàng gửi dữ liệu, không cần làm gì, chỉ cần chờ file
+                    }
+                    else if (msg == "COPY_DATA_COMPLETE")
+                    {
+                        // Máy nguồn đã gửi xong tất cả dữ liệu (bài làm + các file đề thi)
+                        if (copyDataTarget.ContainsKey(ip))
+                        {
+                            string targetIP = copyDataTarget[ip];
+                            copyDataTarget.Remove(ip); // Xóa sau khi hoàn thành
+                            
+                            // Xóa tên file khỏi dictionary nếu còn
+                            if (copyDataFileName.ContainsKey(ip))
+                            {
+                                copyDataFileName.Remove(ip);
+                            }
+                            
+                            // Hiển thị thông báo thành công
+                            MessageBox.Show(
+                                $"Đã copy dữ liệu từ máy {ip} sang máy {targetIP} thành công!\n" +
+                                $"Bao gồm: Bài làm (ZIP) và các file đề thi từ thư mục phát đề.",
+                                "Thành công",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+                        }
                     }
                     else 
                     {
@@ -206,9 +244,9 @@ namespace LapTrinhMang
                         // Kiểm tra xem có phải là copy data request không
                         if (copyDataTarget.ContainsKey(ip))
                         {
-                            // Đây là dữ liệu từ máy nguồn cần chuyển đến máy đích
+                            // Đây là dữ liệu từ máy nguồn cần chuyển tiếp đến máy đích
                             string targetIP = copyDataTarget[ip];
-                            copyDataTarget.Remove(ip); // Xóa sau khi sử dụng
+                            // KHÔNG xóa copyDataTarget ở đây vì có thể còn nhiều file khác đang được gửi
 
                             // Kiểm tra máy đích có kết nối không
                             var mayDich = dsMay?.FirstOrDefault(x => x.IP == targetIP);
@@ -219,36 +257,50 @@ namespace LapTrinhMang
                                     "Lỗi",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
+                                // Xóa copyDataTarget nếu máy đích không kết nối
+                                copyDataTarget.Remove(ip);
                                 return;
                             }
 
                             // Gửi dữ liệu đến máy đích
                             try
                             {
-                                // Lấy tên file từ máy nguồn (nếu có)
-                                string copyFileName = duongDanBaiLam.ContainsKey(ip) 
-                                    ? duongDanBaiLam[ip] 
-                                    : $"BaiLam_{ip.Replace(".", "_")}.zip";
+                                // Lấy tên file từ dictionary copyDataFileName (đã được lưu khi nhận FILENAME message)
+                                string copyFileName = copyDataFileName.ContainsKey(ip) 
+                                    ? copyDataFileName[ip] 
+                                    : (duongDanBaiLam.ContainsKey(ip) 
+                                        ? duongDanBaiLam[ip] 
+                                        : $"BaiLam_{ip.Replace(".", "_")}.zip");
                                 
                                 // Xóa tên file khỏi dictionary sau khi lấy
-                                if (duongDanBaiLam.ContainsKey(ip))
+                                if (copyDataFileName.ContainsKey(ip))
+                                {
+                                    copyDataFileName.Remove(ip);
+                                }
+                                
+                                // Kiểm tra xem đây có phải là file đầu tiên (bài làm ZIP) không
+                                bool isFirstFile = duongDanBaiLam.ContainsKey(ip);
+                                if (isFirstFile)
+                                {
                                     duongDanBaiLam.Remove(ip);
+                                    
+                                    // Đây là file bài làm (ZIP) - gửi đường dẫn lưu trước
+                                    string linkDeThi = txtGuiDeThi.Text;
+                                    if (!string.IsNullOrEmpty(linkDeThi))
+                                    {
+                                        serverSocket.SendMessageToClient(targetIP, $"SAVEPATH|{linkDeThi}");
+                                        Thread.Sleep(500);
+                                    }
+                                }
 
                                 // Gửi tên file trước (giống như khi gửi đề thi)
                                 serverSocket.SendMessageToClient(targetIP, $"FILENAME|{copyFileName}");
-                                System.Threading.Thread.Sleep(300); // Đợi client nhận tên file
+                                Thread.Sleep(300); // Đợi client nhận tên file
 
                                 // Sau đó gửi nội dung file
                                 serverSocket.SendFileToClient(targetIP, bytes);
                                 
-                                // Gửi các file đề thi từ server sang máy đích (nếu có)
-                                SendDeThiToClient(targetIP);
-                                
-                                MessageBox.Show(
-                                    $"Đã copy dữ liệu bài làm từ máy {ip} sang máy {targetIP} thành công!",
-                                    "Thành công",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information);
+                                // Không hiển thị thông báo ở đây, chờ đến khi nhận COPY_DATA_COMPLETE
                             }
                             catch (Exception ex)
                             {
@@ -257,6 +309,8 @@ namespace LapTrinhMang
                                     "Lỗi",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
+                                // Xóa copyDataTarget nếu có lỗi
+                                copyDataTarget.Remove(ip);
                             }
                             return;
                         }
