@@ -595,7 +595,17 @@ namespace LapTrinhMang
 
         private void TimerDemNguoc_Tick(object sender, EventArgs e)
         {
+            thoiGianConLai = thoiGianConLai.Subtract(TimeSpan.FromSeconds(1));
+            lblDemTG.Text = thoiGianConLai.ToString(@"hh\:mm\:ss");
 
+            if (thoiGianConLai.TotalSeconds <= 0)
+            {
+                timerDemNguoc.Stop();
+                lblDemTG.Text = "00:00:00";
+
+                serverSocket.BroadcastMessage("YEUCAU_NOPBAI");
+                MessageBox.Show("Hết giờ! Đã gửi yêu cầu thu bài cho tất cả Client.", "Hết giờ", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void btnThuBai_Click(object sender, EventArgs e)
