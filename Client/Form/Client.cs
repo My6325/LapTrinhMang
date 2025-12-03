@@ -224,7 +224,10 @@ namespace Client
             }
             else
             {
-                MessageBox.Show("Kết nối thất bại! Hãy kiểm tra IP hoặc Server chưa chạy.");
+                string errorMsg = !string.IsNullOrEmpty(socket.LastError) 
+                    ? socket.LastError 
+                    : "Kết nối thất bại! Hãy kiểm tra IP hoặc Server chưa chạy.";
+                MessageBox.Show(errorMsg, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }

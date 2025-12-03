@@ -27,8 +27,18 @@ namespace Client.Networking
             try
             {
                 client = new TcpClient();
-                client.Connect(ip, port);
-
+                
+                // Thiết lập timeout kết nối (5 giây)
+                var connectResult = client.BeginConnect(ip, port, null, null);
+                var success = connectResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(5));
+                
+                if (!success)
+                {
+                    client.Close();
+                    throw new TimeoutException($"Không thể kết nối đến {ip}:{port} trong vòng 5 giây. Có thể server chưa chạy hoặc IP không đúng.");
+                }
+                
+                client.EndConnect(connectResult);
                 stream = client.GetStream();
                 isConnected = true;
 
@@ -38,11 +48,24 @@ namespace Client.Networking
 
                 return true;
             }
-            catch
+            catch (TimeoutException ex)
             {
+                LastError = ex.Message;
+                return false;
+            }
+            catch (System.Net.Sockets.SocketException ex)
+            {
+                LastError = $"Lỗi kết nối: {ex.Message}. Kiểm tra IP server ({ip}) và đảm bảo server đang chạy.";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LastError = $"Lỗi không xác định: {ex.Message}";
                 return false;
             }
         }
+        
+        public string LastError { get; private set; } = "";
 
         private void Listen()
         {
