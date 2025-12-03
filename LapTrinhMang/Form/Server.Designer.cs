@@ -54,6 +54,7 @@
             this.copyDữLiệuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gửiTinNhắnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnXemDSDD = new System.Windows.Forms.Button();
+            this.btnThuLaiDe = new System.Windows.Forms.Button();
             this.gbDeThi.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nupThoiGian)).BeginInit();
             this.gbDSMay.SuspendLayout();
@@ -182,7 +183,7 @@
             // btnXoa
             // 
             this.btnXoa.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnXoa.Location = new System.Drawing.Point(129, 382);
+            this.btnXoa.Location = new System.Drawing.Point(126, 382);
             this.btnXoa.Name = "btnXoa";
             this.btnXoa.Size = new System.Drawing.Size(88, 33);
             this.btnXoa.TabIndex = 11;
@@ -193,7 +194,7 @@
             // btnPhatDe
             // 
             this.btnPhatDe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnPhatDe.Location = new System.Drawing.Point(238, 382);
+            this.btnPhatDe.Location = new System.Drawing.Point(236, 382);
             this.btnPhatDe.Name = "btnPhatDe";
             this.btnPhatDe.Size = new System.Drawing.Size(88, 33);
             this.btnPhatDe.TabIndex = 12;
@@ -306,6 +307,17 @@
             this.btnXemDSDD.UseVisualStyleBackColor = true;
             this.btnXemDSDD.Click += new System.EventHandler(this.btnXemDSDD_Click);
             // 
+            // btnThuLaiDe
+            // 
+            this.btnThuLaiDe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnThuLaiDe.Location = new System.Drawing.Point(340, 382);
+            this.btnThuLaiDe.Name = "btnThuLaiDe";
+            this.btnThuLaiDe.Size = new System.Drawing.Size(96, 33);
+            this.btnThuLaiDe.TabIndex = 12;
+            this.btnThuLaiDe.Text = "Thu lại đề";
+            this.btnThuLaiDe.UseVisualStyleBackColor = true;
+            this.btnThuLaiDe.Click += new System.EventHandler(this.btnThuLaiDe_Click);
+            // 
             // Server
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
@@ -318,6 +330,7 @@
             this.Controls.Add(this.nupThoiGian);
             this.Controls.Add(this.lblTG);
             this.Controls.Add(this.btnGuiTN);
+            this.Controls.Add(this.btnThuLaiDe);
             this.Controls.Add(this.btnPhatDe);
             this.Controls.Add(this.btnXoa);
             this.Controls.Add(this.btnThem);
@@ -373,6 +386,7 @@
         private System.Windows.Forms.ToolStripMenuItem copyDữLiệuToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gửiTinNhắnToolStripMenuItem;
         private System.Windows.Forms.Button btnXemDSDD;
+        private System.Windows.Forms.Button btnThuLaiDe;
     }
 }
 

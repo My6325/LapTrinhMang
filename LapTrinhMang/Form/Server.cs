@@ -27,8 +27,8 @@ namespace LapTrinhMang
         private List<Student> dsSinhVien = new List<Student>();
         private Dictionary<string, string> duongDanDeThi = new Dictionary<string, string>();//ListBox hiển thị tên file, Dictionary lưu đường dẫn thật để gửi
         private Dictionary<string, string> duongDanBaiLam = new Dictionary<string, string>();
-        private Dictionary<string, string> copyDataTarget = new Dictionary<string, string>(); // IP nguồn -> IP đích cho copy data
-        private Dictionary<string, string> copyDataFileName = new Dictionary<string, string>(); // IP nguồn -> tên file hiện tại đang copy 
+        private Dictionary<string, string> dichCopyDuLieu = new Dictionary<string, string>(); // IP nguồn -> IP đích cho copy data
+        private Dictionary<string, string> tenFileCopyDuLieu = new Dictionary<string, string>(); // IP nguồn -> tên file hiện tại đang copy 
         private TimeSpan thoiGianConLai;
         private System.Windows.Forms.Timer timerDemNguoc;
         private DanhSachDiemDanh formDSDD = null;
@@ -131,8 +131,6 @@ namespace LapTrinhMang
                         may.IsConnected = false;
                         LoadDanhSachMay();
                     }
-
-                    //MessageBox.Show("Client ngắt kết nối: " + ip);
                 }));
             };
 
@@ -185,44 +183,60 @@ namespace LapTrinhMang
                     }
                     else if (msg.StartsWith("NOPBAI_FILENAME|"))
                     {
-                        string fileName = msg.Substring("NOPBAI_FILENAME|".Length).Trim();
-                        duongDanBaiLam[ip] = fileName;
+                        string tenFile = msg.Substring("NOPBAI_FILENAME|".Length).Trim();
+                        duongDanBaiLam[ip] = tenFile;
                         // Nếu đang trong quá trình copy, lưu tên file này
-                        if (copyDataTarget.ContainsKey(ip))
+                        if (dichCopyDuLieu.ContainsKey(ip))
                         {
-                            copyDataFileName[ip] = fileName;
+                            tenFileCopyDuLieu[ip] = tenFile;
                         }
                     }
                     else if (msg.StartsWith("FILENAME|"))
                     {
                         // Nhận tên file từ máy nguồn trong quá trình copy
-                        if (copyDataTarget.ContainsKey(ip))
+                        if (dichCopyDuLieu.ContainsKey(ip))
                         {
-                            string fileName = msg.Substring("FILENAME|".Length).Trim();
-                            copyDataFileName[ip] = fileName;
+                            string tenFile = msg.Substring("FILENAME|".Length).Trim();
+                            tenFileCopyDuLieu[ip] = tenFile;
                         }
                     }
                     else if (msg == "COPY_DATA_READY")
                     {
                         // Client sẵn sàng gửi dữ liệu, không cần làm gì, chỉ cần chờ file
                     }
+                    else if (msg.StartsWith("COPY_STUDENT_INFO|"))
+                    {
+                        // Nhận thông tin sinh viên từ máy nguồn và chuyển tiếp đến máy đích
+                        if (dichCopyDuLieu.ContainsKey(ip))
+                        {
+                            string ipDich = dichCopyDuLieu[ip];
+                            string jsonSinhVien = msg.Substring("COPY_STUDENT_INFO|".Length).Trim();
+                            
+                            // Chuyển tiếp thông tin sinh viên đến máy đích
+                            var mayDich = dsMay?.FirstOrDefault(x => x.IP == ipDich);
+                            if (mayDich != null && mayDich.IsConnected)
+                            {
+                                serverSocket.SendMessageToClient(ipDich, $"COPY_STUDENT_INFO|{jsonSinhVien}");
+                            }
+                        }
+                    }
                     else if (msg == "COPY_DATA_COMPLETE")
                     {
                         // Máy nguồn đã gửi xong tất cả dữ liệu (bài làm + các file đề thi)
-                        if (copyDataTarget.ContainsKey(ip))
+                        if (dichCopyDuLieu.ContainsKey(ip))
                         {
-                            string targetIP = copyDataTarget[ip];
-                            copyDataTarget.Remove(ip); // Xóa sau khi hoàn thành
+                            string ipDich = dichCopyDuLieu[ip];
+                            dichCopyDuLieu.Remove(ip); // Xóa sau khi hoàn thành
                             
                             // Xóa tên file khỏi dictionary nếu còn
-                            if (copyDataFileName.ContainsKey(ip))
+                            if (tenFileCopyDuLieu.ContainsKey(ip))
                             {
-                                copyDataFileName.Remove(ip);
+                                tenFileCopyDuLieu.Remove(ip);
                             }
                             
                             // Hiển thị thông báo thành công
                             MessageBox.Show(
-                                $"Đã copy dữ liệu từ máy {ip} sang máy {targetIP} thành công!\n" +
+                                $"Đã copy dữ liệu từ máy {ip} sang máy {ipDich} thành công!\n" +
                                 $"Bao gồm: Bài làm (ZIP) và các file đề thi từ thư mục phát đề.",
                                 "Thành công",
                                 MessageBoxButtons.OK,
@@ -244,45 +258,45 @@ namespace LapTrinhMang
                     try
                     {
                         // Kiểm tra xem có phải là copy data request không
-                        if (copyDataTarget.ContainsKey(ip))
+                        if (dichCopyDuLieu.ContainsKey(ip))
                         {
                             // Đây là dữ liệu từ máy nguồn cần chuyển tiếp đến máy đích
-                            string targetIP = copyDataTarget[ip];
-                            // KHÔNG xóa copyDataTarget ở đây vì có thể còn nhiều file khác đang được gửi
+                            string ipDich = dichCopyDuLieu[ip];
+                            // KHÔNG xóa dichCopyDuLieu ở đây vì có thể còn nhiều file khác đang được gửi
 
                             // Kiểm tra máy đích có kết nối không
-                            var mayDich = dsMay?.FirstOrDefault(x => x.IP == targetIP);
+                            var mayDich = dsMay?.FirstOrDefault(x => x.IP == ipDich);
                             if (mayDich == null || !mayDich.IsConnected)
                             {
                                 MessageBox.Show(
-                                    $"Không thể copy dữ liệu: Máy đích {targetIP} chưa kết nối đến server!",
+                                    $"Không thể copy dữ liệu: Máy đích {ipDich} chưa kết nối đến server!",
                                     "Lỗi",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
-                                // Xóa copyDataTarget nếu máy đích không kết nối
-                                copyDataTarget.Remove(ip);
+                                // Xóa dichCopyDuLieu nếu máy đích không kết nối
+                                dichCopyDuLieu.Remove(ip);
                                 return;
                             }
 
                             // Gửi dữ liệu đến máy đích
                             try
                             {
-                                // Lấy tên file từ dictionary copyDataFileName (đã được lưu khi nhận FILENAME message)
-                                string copyFileName = copyDataFileName.ContainsKey(ip) 
-                                    ? copyDataFileName[ip] 
+                                // Lấy tên file từ dictionary tenFileCopyDuLieu (đã được lưu khi nhận FILENAME message)
+                                string tenFileCopy = tenFileCopyDuLieu.ContainsKey(ip) 
+                                    ? tenFileCopyDuLieu[ip] 
                                     : (duongDanBaiLam.ContainsKey(ip) 
                                         ? duongDanBaiLam[ip] 
                                         : $"BaiLam_{ip.Replace(".", "_")}.zip");
                                 
                                 // Xóa tên file khỏi dictionary sau khi lấy
-                                if (copyDataFileName.ContainsKey(ip))
+                                if (tenFileCopyDuLieu.ContainsKey(ip))
                                 {
-                                    copyDataFileName.Remove(ip);
+                                    tenFileCopyDuLieu.Remove(ip);
                                 }
                                 
                                 // Kiểm tra xem đây có phải là file đầu tiên (bài làm ZIP) không
-                                bool isFirstFile = duongDanBaiLam.ContainsKey(ip);
-                                if (isFirstFile)
+                                bool laFileDauTien = duongDanBaiLam.ContainsKey(ip);
+                                if (laFileDauTien)
                                 {
                                     duongDanBaiLam.Remove(ip);
                                     
@@ -290,29 +304,29 @@ namespace LapTrinhMang
                                     string linkDeThi = txtGuiDeThi.Text;
                                     if (!string.IsNullOrEmpty(linkDeThi))
                                     {
-                                        serverSocket.SendMessageToClient(targetIP, $"SAVEPATH|{linkDeThi}");
+                                        serverSocket.SendMessageToClient(ipDich, $"SAVEPATH|{linkDeThi}");
                                         Thread.Sleep(500);
                                     }
                                 }
 
                                 // Gửi tên file trước (giống như khi gửi đề thi)
-                                serverSocket.SendMessageToClient(targetIP, $"FILENAME|{copyFileName}");
+                                serverSocket.SendMessageToClient(ipDich, $"FILENAME|{tenFileCopy}");
                                 Thread.Sleep(300); // Đợi client nhận tên file
 
                                 // Sau đó gửi nội dung file
-                                serverSocket.SendFileToClient(targetIP, bytes);
+                                serverSocket.SendFileToClient(ipDich, bytes);
                                 
                                 // Không hiển thị thông báo ở đây, chờ đến khi nhận COPY_DATA_COMPLETE
                             }
                             catch (Exception ex)
                             {
                                 MessageBox.Show(
-                                    $"Lỗi khi gửi dữ liệu đến máy đích {targetIP}: {ex.Message}",
+                                    $"Lỗi khi gửi dữ liệu đến máy đích {ipDich}: {ex.Message}",
                                     "Lỗi",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
-                                // Xóa copyDataTarget nếu có lỗi
-                                copyDataTarget.Remove(ip);
+                                // Xóa dichCopyDuLieu nếu có lỗi
+                                dichCopyDuLieu.Remove(ip);
                             }
                             return;
                         }
@@ -534,53 +548,62 @@ namespace LapTrinhMang
                 return;
             }
 
-            int soPhut = (int)nupThoiGian.Value;
-            if (soPhut <= 0)
+            if (string.IsNullOrEmpty(linkDeThi))
             {
-                MessageBox.Show("Thời gian phải lớn hơn 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Chưa chọn thư mục để gửi đề thi!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (!string.IsNullOrEmpty(linkDeThi))
+
+            // Kiểm tra có client nào đang kết nối không
+            var dsMayKetNoi = dsMay?.Where(m => m.IsConnected).ToList();
+            if (dsMayKetNoi == null || dsMayKetNoi.Count == 0)
             {
-                serverSocket.BroadcastMessage($"SAVEPATH|{linkDeThi}");
-                Thread.Sleep(500); // Đợi Client nhận đường dẫn
+                MessageBox.Show("Không có client nào đang kết nối!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
-            int count = 0;
-            foreach (var kvp in duongDanDeThi)
+            try
             {
-                string fileName = kvp.Key;
-                string filePath = kvp.Value;
+                // Gửi đường dẫn lưu đề thi đến tất cả client
+                serverSocket.BroadcastMessage($"SAVEPATH|{linkDeThi}");
+                Thread.Sleep(500);
 
-                if (File.Exists(filePath))
+                // Gửi từng file đề thi
+                foreach (var item in duongDanDeThi)
                 {
+                    string tenFile = item.Key;
+                    string duongDanFile = item.Value;
+
+                    if (!File.Exists(duongDanFile))
+                    {
+                        MessageBox.Show($"File không tồn tại: {duongDanFile}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        continue;
+                    }
+
                     // Gửi tên file trước
-                    serverSocket.BroadcastMessage($"FILENAME|{fileName}");
-                    Thread.Sleep(300); // Đợi client nhận tên file
+                    serverSocket.BroadcastMessage($"FILENAME|{tenFile}");
+                    Thread.Sleep(300);
 
-                    // Sau đó gửi nội dung file
-                    byte[] bytes = File.ReadAllBytes(filePath);
-                    serverSocket.BroadcastFile(bytes);
-
-                    count++;
-                    Console.WriteLine($"Đã gửi file {count}/{duongDanDeThi.Count}: {fileName} ({bytes.Length} bytes)");
-
+                    // Đọc và gửi nội dung file
+                    byte[] duLieuFile = File.ReadAllBytes(duongDanFile);
+                    serverSocket.BroadcastFile(duLieuFile);
                     Thread.Sleep(500); // Đợi giữa các file
                 }
-                else
-                {
-                    MessageBox.Show($"Không tìm thấy file: {filePath}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+
+                MessageBox.Show(
+                    $"Đã phát {duongDanDeThi.Count} đề thi đến {dsMayKetNoi.Count} client đang kết nối.",
+                    "Thông báo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
             }
-            // Tạo thời gian đếm ngược
-            thoiGianConLai = TimeSpan.FromMinutes(soPhut);
-            lblDemTG.Text = thoiGianConLai.ToString(@"hh\:mm\:ss");
-
-            // Gửi lệnh bắt đầu countdown
-            serverSocket.BroadcastMessage($"BATDAU|{soPhut}");
-            timerDemNguoc.Start();
-            MessageBox.Show($"Đã phát {duongDanDeThi.Count} đề thi!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Lỗi khi phát đề thi: {ex.Message}",
+                    "Lỗi",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
 
         private void Server_Load(object sender, EventArgs e)
@@ -589,7 +612,6 @@ namespace LapTrinhMang
             string localIp = GetLocalIPAddress();
             this.Text = $"Server is running at: {localIp}:{port}";
 
-            //Khởi tạo thời gian
             timerDemNguoc = new System.Windows.Forms.Timer();
             timerDemNguoc.Interval = 1000; 
             timerDemNguoc.Tick += TimerDemNguoc_Tick;
@@ -758,7 +780,7 @@ namespace LapTrinhMang
                 // Callback khi copy hoàn tất - lưu thông tin để chuyển tiếp file
                 if (!string.IsNullOrEmpty(sourceIP) && !string.IsNullOrEmpty(targetIP))
                 {
-                    copyDataTarget[sourceIP] = targetIP;
+                    dichCopyDuLieu[sourceIP] = targetIP;
                 }
                 // Refresh danh sách máy sau khi copy
                 LoadDanhSachMay();
@@ -840,6 +862,48 @@ namespace LapTrinhMang
             {
                 // Không hiển thị lỗi để không làm gián đoạn quá trình copy
                 Console.WriteLine($"Lỗi khi gửi đề thi đến {targetIP}: {ex.Message}");
+            }
+        }
+
+        private void btnThuLaiDe_Click(object sender, EventArgs e)
+        {
+            // Xác nhận trước khi thu hồi
+            DialogResult result = MessageBox.Show(
+                "Bạn có chắc muốn thu hồi toàn bộ đề thi đã phát cho tất cả client?\n\n" +
+                "Tất cả file đề thi trong thư mục đề thi của client sẽ bị xóa.\n" +
+                "Thời gian làm bài sẽ được reset về 0.",
+                "Xác nhận thu hồi đề thi",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result != DialogResult.Yes)
+                return;
+
+            try
+            {
+                // Reset thời gian về 0
+                timerDemNguoc.Stop();
+                thoiGianConLai = TimeSpan.Zero;
+                dangGiaHan = false;
+                lblDemTG.Text = "00:00:00";
+
+                // Gửi yêu cầu thu hồi đề thi đến tất cả client
+                serverSocket.BroadcastMessage("THU_HOI_DE_THI");
+
+                MessageBox.Show(
+                    "Đã gửi yêu cầu thu hồi đề thi đến tất cả client đang kết nối.\n" +
+                    "Thời gian làm bài đã được reset về 0.",
+                    "Thông báo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Lỗi khi thu hồi đề thi: {ex.Message}",
+                    "Lỗi",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
     }

@@ -20,34 +20,34 @@ namespace Client
     public partial class Client : Form
     {
         private ClientSocket socket = new ClientSocket();
-        private StudentInfo selectedStudent;
+        private StudentInfo sinhVienDaChon;
         private int serverPort = 8888;
 
         private List<StudentInfo> dsSinhVienClient = new List<StudentInfo>();
-        private bool eventsRegistered = false;
-        private string currentFileName = "";
-        private string currentSavePath = "";
+        private bool daDangKySuKien = false;
+        private string tenFileHienTai = "";
+        private string duongDanLuuHienTai = "";
 
-        private bool IsConnected => socket.IsConnected;
+        private bool DaKetNoi => socket.IsConnected;
 
         public Client()
         {
             InitializeComponent();
-            LoadInitialData();
+            TaiDuLieuBanDau();
         }
 
-        private void LoadInitialData()
+        private void TaiDuLieuBanDau()
         {
-            txtIP.Text = GetLocalIPAddress();
+            txtIP.Text = LayDiaChiIPLocal();
 
             cbTTSV.DataSource = null;
 
-            UpdateUI(false);
-            currentSavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "DeThiBaiLam");
+            CapNhatGiaoDien(false);
+            duongDanLuuHienTai = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "DeThiBaiLam");
            // Console.WriteLine($"Đề thi sẽ được lưu tại: {deThiPath}");
         }
 
-        private void UpdateUI(bool connected)
+        private void CapNhatGiaoDien(bool connected)
         {
             btnConnect.Text = connected ? "Disconnect" : "Connect";
             btnĐiemDanh.Enabled = connected;
@@ -68,14 +68,14 @@ namespace Client
                 return;
             }
 
-            if (IsConnected)
+            if (DaKetNoi)
             {
                 socket.Disconnect();
-                UpdateUI(false);
+                CapNhatGiaoDien(false);
                 return;
             }
 
-            if (!eventsRegistered)
+            if (!daDangKySuKien)
             {
                 socket.OnReceiveMessage += (msg) =>
                 {
@@ -108,34 +108,87 @@ namespace Client
                     }
                     else if (msg.StartsWith("SAVEPATH|")) 
                     {
-                        currentSavePath = msg.Substring("SAVEPATH|".Length).Trim();
+                        duongDanLuuHienTai = msg.Substring("SAVEPATH|".Length).Trim();
                         Invoke(new Action(() =>
                         {
-                            Console.WriteLine($"Đã nhận đường dẫn lưu: {currentSavePath}");
+                            Console.WriteLine($"Đã nhận đường dẫn lưu: {duongDanLuuHienTai}");
                         }));
                     }
                     else if (msg.StartsWith("FILENAME|"))
                     {
                         // Lưu tên file để dùng khi nhận file
-                        currentFileName = msg.Substring("FILENAME|".Length);
+                        tenFileHienTai = msg.Substring("FILENAME|".Length);
                         Invoke(new Action(() =>
                         {
-                            Console.WriteLine($"Chuẩn bị nhận file: {currentFileName}");
+                            Console.WriteLine($"Chuẩn bị nhận file: {tenFileHienTai}");
                         }));
                     }
                     else if (msg == "YEUCAU_NOPBAI")
                     {
                         Invoke(new Action(() =>
                         {
-                            SendBaiLamToServer();
+                            GuiBaiLamLenServer();
                         }));
                     }
                     else if (msg.StartsWith("COPY_DATA_REQUEST"))
                     {
                         Invoke(new Action(() =>
                         {
-                            SendCopyDataToServer();
+                            GuiDuLieuCopyLenServer();
                         }));
+                    }
+                    else if (msg.StartsWith("COPY_STUDENT_INFO|"))
+                    {
+                        // Nhận thông tin sinh viên từ máy nguồn khi copy dữ liệu
+                        string jsonSinhVien = msg.Substring("COPY_STUDENT_INFO|".Length).Trim();
+                        try
+                        {
+                            var sinhVien = JsonSerializer.Deserialize<StudentInfo>(jsonSinhVien);
+                            if (sinhVien != null)
+                            {
+                                Invoke(new Action(() =>
+                                {
+                                    // Tìm sinh viên trong danh sách
+                                    var sinhVienTimThay = dsSinhVienClient.FirstOrDefault(s => s.MSSV == sinhVien.MSSV);
+                                    if (sinhVienTimThay != null)
+                                    {
+                                        // Cập nhật thông tin nếu có khác biệt
+                                        sinhVienTimThay.HoTen = sinhVien.HoTen;
+                                        sinhVienTimThay.Lop = sinhVien.Lop;
+                                        
+                                        // Chọn sinh viên trong combobox
+                                        cbTTSV.SelectedValue = sinhVien.MSSV;
+                                        
+                                        // Cập nhật các textbox
+                                        txtMSSV.Text = sinhVien.MSSV;
+                                        txtHoTen.Text = sinhVien.HoTen;
+                                        txtLop.Text = sinhVien.Lop;
+                                    }
+                                    else
+                                    {
+                                        // Nếu không tìm thấy, thêm vào danh sách
+                                        dsSinhVienClient.Add(sinhVien);
+                                        cbTTSV.DataSource = null;
+                                        cbTTSV.DataSource = dsSinhVienClient;
+                                        cbTTSV.DisplayMember = "HoTen";
+                                        cbTTSV.ValueMember = "MSSV";
+                                        cbTTSV.SelectedValue = sinhVien.MSSV;
+                                        
+                                        // Cập nhật các textbox
+                                        txtMSSV.Text = sinhVien.MSSV;
+                                        txtHoTen.Text = sinhVien.HoTen;
+                                        txtLop.Text = sinhVien.Lop;
+                                    }
+                                }));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Invoke(new Action(() =>
+                            {
+                                Console.WriteLine($"Lỗi parse thông tin sinh viên: {ex.Message}");
+                            }));
+                        }
                     }
                     else if (msg.StartsWith("BATDAU|"))
                     {
@@ -151,36 +204,44 @@ namespace Client
                         {
                         }));
                     }
+                    else if (msg == "THU_HOI_DE_THI")
+                    {
+                        // Thu hồi đề thi: xóa tất cả file trong thư mục đề thi
+                        Invoke(new Action(() =>
+                        {
+                            ThuHoiDeThi();
+                        }));
+                    }
                 };
 
-                socket.OnReceiveFile += (fileBytes) =>
+                socket.OnReceiveFile += (duLieuFile) =>
                 {
                     Invoke(new Action(() =>
                     {
                         try
                         {
-                            string folder = string.IsNullOrEmpty(currentSavePath)
+                            string thuMuc = string.IsNullOrEmpty(duongDanLuuHienTai)
                                 ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DefaultDeThi") // Dùng Documents làm dự phòng
-                                : currentSavePath;
-                            if (!Directory.Exists(folder))
-                                Directory.CreateDirectory(folder);
+                                : duongDanLuuHienTai;
+                            if (!Directory.Exists(thuMuc))
+                                Directory.CreateDirectory(thuMuc);
 
                             // Lưu file với tên đã nhận hoặc tên mặc định
-                            string fileName = string.IsNullOrEmpty(currentFileName)
+                            string tenFile = string.IsNullOrEmpty(tenFileHienTai)
                                 ? $"DeThi_{DateTime.Now:yyyyMMdd_HHmmss}.pdf"
-                                : currentFileName;
+                                : tenFileHienTai;
 
-                            string filePath = Path.Combine(folder, fileName);
-                            File.WriteAllBytes(filePath, fileBytes);
+                            string duongDanFile = Path.Combine(thuMuc, tenFile);
+                            File.WriteAllBytes(duongDanFile, duLieuFile);
 
-                            string displayFileName = Path.GetFileName(fileName);
+                            string tenFileHienThi = Path.GetFileName(tenFile);
                             Invoke(new Action(() =>
                             {
-                                txtDeThi.Text = displayFileName;
+                                txtDeThi.Text = tenFileHienThi;
                             }));
 
-                            currentFileName = "";
-                            //currentSavePath = "";
+                            tenFileHienTai = "";
+                            //duongDanLuuHienTai = "";
                         }
                         catch (Exception ex)
                         {
@@ -194,39 +255,39 @@ namespace Client
                     Invoke(new Action(() =>
                     {
                         MessageBox.Show("Mất kết nối Server!");
-                        UpdateUI(false);
+                        CapNhatGiaoDien(false);
                     }));
                 };
 
-                eventsRegistered = true;
+                daDangKySuKien = true;
             }
 
             // 2SAU KHI GẮN EVENT MỚI CONNECT
-            bool ok = socket.Connect(ip, port);
-            if (ok)
+            bool thanhCong = socket.Connect(ip, port);
+            if (thanhCong)
             {
                 MessageBox.Show("Kết nối server thành công!");
-                UpdateUI(true);
+                CapNhatGiaoDien(true);
             }
             else
             {
-                string errorMsg = !string.IsNullOrEmpty(socket.LastError) 
+                string thongBaoLoi = !string.IsNullOrEmpty(socket.LastError) 
                     ? socket.LastError 
                     : "Kết nối thất bại! Hãy kiểm tra IP hoặc Server chưa chạy.";
-                MessageBox.Show(errorMsg, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(thongBaoLoi, "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }
 
         private void btnĐiemDanh_Click(object sender, EventArgs e)
         {
-            if (selectedStudent == null)
+            if (sinhVienDaChon == null)
             {
                 MessageBox.Show("Vui lòng chọn tên sinh viên trước khi điểm danh.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (!IsConnected)
+            if (!DaKetNoi)
             {
                 MessageBox.Show("Chưa kết nối Server.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -235,10 +296,10 @@ namespace Client
             try
             {
                 // Gửi MSSV đã chọn lên Server
-                string mssv = selectedStudent.MSSV;
+                string mssv = sinhVienDaChon.MSSV;
                 socket.SendMessage($"DIEMDANH|{mssv}");
 
-                MessageBox.Show($"Đã gửi điểm danh cho {selectedStudent.HoTen} ({mssv})!");
+                MessageBox.Show($"Đã gửi điểm danh cho {sinhVienDaChon.HoTen} ({mssv})!");
                 btnĐiemDanh.Enabled = false;
             }
             catch (Exception ex)
@@ -249,16 +310,16 @@ namespace Client
 
         private void cbTTSV_SelectedIndexChanged(object sender, EventArgs e)
         {
-            selectedStudent = cbTTSV.SelectedItem as StudentInfo;
-            if (selectedStudent != null)
+            sinhVienDaChon = cbTTSV.SelectedItem as StudentInfo;
+            if (sinhVienDaChon != null)
             {
-                txtLop.Text = selectedStudent.Lop;
-                txtMSSV.Text = selectedStudent.MSSV;
-                txtHoTen.Text = selectedStudent.HoTen;
+                txtLop.Text = sinhVienDaChon.Lop;
+                txtMSSV.Text = sinhVienDaChon.MSSV;
+                txtHoTen.Text = sinhVienDaChon.HoTen;
             }
         }
 
-        private string GetLocalIPAddress()
+        private string LayDiaChiIPLocal()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (var ip in host.AddressList)
@@ -270,22 +331,22 @@ namespace Client
             }
             return "127.0.0.1";
         }
-        private void SendBaiLamToServer()
+        private void GuiBaiLamLenServer()
         {
-            if (selectedStudent == null)
+            if (sinhVienDaChon == null)
             {
                 MessageBox.Show("Chưa chọn thông tin sinh viên để nộp bài", "Lỗi Nộp bài", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            if (!IsConnected) return;
+            if (!DaKetNoi) return;
 
-            string sourceFolder = currentSavePath;
-            string zipFileName = $"{selectedStudent.MSSV}_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
+            string thuMucNguon = duongDanLuuHienTai;
+            string tenFileZip = $"{sinhVienDaChon.MSSV}_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
 
             // Tạo đường dẫn file ZIP tạm thời (sử dụng thư mục Temp của hệ thống)
-            string tempZipPath = Path.Combine(Path.GetTempPath(), zipFileName);
+            string duongDanZipTam = Path.Combine(Path.GetTempPath(), tenFileZip);
 
-            if (string.IsNullOrEmpty(sourceFolder) || !Directory.Exists(sourceFolder))
+            if (string.IsNullOrEmpty(thuMucNguon) || !Directory.Exists(thuMucNguon))
             {
                 MessageBox.Show($"Thư mục bài làm không tồn tại", "Lỗi Nén", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -293,16 +354,16 @@ namespace Client
 
             try
             {
-                if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
+                if (File.Exists(duongDanZipTam)) File.Delete(duongDanZipTam);
 
                 // Thực hiện nén
-                ZipFile.CreateFromDirectory(sourceFolder, tempZipPath, CompressionLevel.Fastest, false);
-                socket.SendMessage($"NOPBAI_FILENAME|{zipFileName}");
+                ZipFile.CreateFromDirectory(thuMucNguon, duongDanZipTam, CompressionLevel.Fastest, false);
+                socket.SendMessage($"NOPBAI_FILENAME|{tenFileZip}");
                 Thread.Sleep(300);
 
                 //Gửi nội dung file ZIP
-                byte[] fileBytes = File.ReadAllBytes(tempZipPath);
-                socket.SendFile(fileBytes);
+                byte[] duLieuFile = File.ReadAllBytes(duongDanZipTam);
+                socket.SendFile(duLieuFile);
             }
             catch (Exception ex)
             {
@@ -311,25 +372,25 @@ namespace Client
             }
             finally
             {
-                if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
+                if (File.Exists(duongDanZipTam)) File.Delete(duongDanZipTam);
             }
         }
 
         /// <summary>
         /// Gửi dữ liệu copy: bài làm (ZIP) và các file từ thư mục phát đề
         /// </summary>
-        private void SendCopyDataToServer()
+        private void GuiDuLieuCopyLenServer()
         {
-            if (selectedStudent == null)
+            if (sinhVienDaChon == null)
             {
                 MessageBox.Show("Chưa chọn thông tin sinh viên để copy dữ liệu", "Lỗi Copy", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            if (!IsConnected) return;
+            if (!DaKetNoi) return;
 
-            string sourceFolder = currentSavePath;
+            string thuMucNguon = duongDanLuuHienTai;
 
-            if (string.IsNullOrEmpty(sourceFolder) || !Directory.Exists(sourceFolder))
+            if (string.IsNullOrEmpty(thuMucNguon) || !Directory.Exists(thuMucNguon))
             {
                 MessageBox.Show($"Thư mục phát đề không tồn tại", "Lỗi Copy", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -337,55 +398,98 @@ namespace Client
 
             try
             {
-                // 1. Gửi bài làm (file ZIP)
-                string zipFileName = $"{selectedStudent.MSSV}_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
-                string tempZipPath = Path.Combine(Path.GetTempPath(), zipFileName);
+                // Gửi thông tin sinh viên trước khi gửi file
+                if (sinhVienDaChon != null)
+                {
+                    string jsonSinhVien = JsonSerializer.Serialize(sinhVienDaChon);
+                    socket.SendMessage($"COPY_STUDENT_INFO|{jsonSinhVien}");
+                    Thread.Sleep(300);
+                }
 
-                if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
+                // Gửi các file từ thư mục phát đề (không nén)
+                string[] danhSachFile = Directory.GetFiles(thuMucNguon);
+                int soLuongFile = 0;
 
-                // Thực hiện nén
-                ZipFile.CreateFromDirectory(sourceFolder, tempZipPath, CompressionLevel.Fastest, false);
-                socket.SendMessage($"NOPBAI_FILENAME|{zipFileName}");
-                Thread.Sleep(300);
-
-                // Gửi nội dung file ZIP
-                byte[] fileBytes = File.ReadAllBytes(tempZipPath);
-                socket.SendFile(fileBytes);
-                Thread.Sleep(500); // Đợi server xử lý
-
-                // Xóa file ZIP tạm
-                if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
-
-                // 2. Gửi các file đề thi từ thư mục phát đề
-                string[] files = Directory.GetFiles(sourceFolder);
-                int fileCount = 0;
-
-                foreach (string filePath in files)
+                foreach (string duongDanFile in danhSachFile)
                 {
                     // Bỏ qua file ZIP nếu có
-                    if (Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+                    if (Path.GetExtension(duongDanFile).Equals(".zip", StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    string fileName = Path.GetFileName(filePath);
-                    byte[] fileData = File.ReadAllBytes(filePath);
+                    string tenFile = Path.GetFileName(duongDanFile);
+                    byte[] duLieuFile = File.ReadAllBytes(duongDanFile);
 
                     // Gửi tên file trước
-                    socket.SendMessage($"FILENAME|{fileName}");
+                    socket.SendMessage($"FILENAME|{tenFile}");
                     Thread.Sleep(300);
 
                     // Gửi nội dung file
-                    socket.SendFile(fileData);
+                    socket.SendFile(duLieuFile);
                     Thread.Sleep(500); // Đợi giữa các file
 
-                    fileCount++;
+                    soLuongFile++;
                 }
 
-                // 3. Gửi tín hiệu hoàn thành copy
+                // Gửi tín hiệu hoàn thành copy
                 socket.SendMessage("COPY_DATA_COMPLETE");
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi gửi dữ liệu copy: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Thu hồi đề thi: xóa tất cả file trong thư mục đề thi
+        /// </summary>
+        private void ThuHoiDeThi()
+        {
+            try
+            {
+                string thuMucDeThi = string.IsNullOrEmpty(duongDanLuuHienTai)
+                    ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DefaultDeThi")
+                    : duongDanLuuHienTai;
+
+                if (!Directory.Exists(thuMucDeThi))
+                {
+                    MessageBox.Show("Thư mục đề thi không tồn tại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                // Lấy danh sách tất cả file trong thư mục
+                string[] danhSachFile = Directory.GetFiles(thuMucDeThi);
+                int soLuongFile = danhSachFile.Length;
+
+                if (soLuongFile == 0)
+                {
+                    return; // Không có file nào, không cần thông báo
+                }
+
+                // Xóa tất cả file (không cần xác nhận)
+                int soFileDaXoa = 0;
+                foreach (string duongDanFile in danhSachFile)
+                {
+                    try
+                    {
+                        File.Delete(duongDanFile);
+                        soFileDaXoa++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Không thể xóa file {duongDanFile}: {ex.Message}");
+                    }
+                }
+
+                // Xóa tên file hiển thị trên form
+                txtDeThi.Text = "";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Lỗi khi thu hồi đề thi: {ex.Message}",
+                    "Lỗi",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
     }
