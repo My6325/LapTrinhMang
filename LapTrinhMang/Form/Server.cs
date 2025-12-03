@@ -210,10 +210,40 @@ namespace LapTrinhMang
                             string targetIP = copyDataTarget[ip];
                             copyDataTarget.Remove(ip); // Xóa sau khi sử dụng
 
+                            // Kiểm tra máy đích có kết nối không
+                            var mayDich = dsMay?.FirstOrDefault(x => x.IP == targetIP);
+                            if (mayDich == null || !mayDich.IsConnected)
+                            {
+                                MessageBox.Show(
+                                    $"Không thể copy dữ liệu: Máy đích {targetIP} chưa kết nối đến server!",
+                                    "Lỗi",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                                return;
+                            }
+
                             // Gửi dữ liệu đến máy đích
                             try
                             {
+                                // Lấy tên file từ máy nguồn (nếu có)
+                                string copyFileName = duongDanBaiLam.ContainsKey(ip) 
+                                    ? duongDanBaiLam[ip] 
+                                    : $"BaiLam_{ip.Replace(".", "_")}.zip";
+                                
+                                // Xóa tên file khỏi dictionary sau khi lấy
+                                if (duongDanBaiLam.ContainsKey(ip))
+                                    duongDanBaiLam.Remove(ip);
+
+                                // Gửi tên file trước (giống như khi gửi đề thi)
+                                serverSocket.SendMessageToClient(targetIP, $"FILENAME|{copyFileName}");
+                                System.Threading.Thread.Sleep(300); // Đợi client nhận tên file
+
+                                // Sau đó gửi nội dung file
                                 serverSocket.SendFileToClient(targetIP, bytes);
+                                
+                                // Gửi các file đề thi từ server sang máy đích (nếu có)
+                                SendDeThiToClient(targetIP);
+                                
                                 MessageBox.Show(
                                     $"Đã copy dữ liệu bài làm từ máy {ip} sang máy {targetIP} thành công!",
                                     "Thành công",
@@ -693,6 +723,54 @@ namespace LapTrinhMang
             }
             else
                 formDSDD.Activate();
+        }
+
+        /// <summary>
+        /// Gửi các file đề thi từ server đến một client cụ thể
+        /// </summary>
+        private void SendDeThiToClient(string targetIP)
+        {
+            try
+            {
+                // Kiểm tra có đề thi nào không
+                if (duongDanDeThi == null || duongDanDeThi.Count == 0)
+                {
+                    return; // Không có đề thi để gửi
+                }
+
+                // Gửi đường dẫn lưu đề thi trước (nếu có)
+                string linkDeThi = txtGuiDeThi.Text;
+                if (!string.IsNullOrEmpty(linkDeThi))
+                {
+                    serverSocket.SendMessageToClient(targetIP, $"SAVEPATH|{linkDeThi}");
+                    Thread.Sleep(500); // Đợi Client nhận đường dẫn
+                }
+
+                // Gửi từng file đề thi
+                foreach (var kvp in duongDanDeThi)
+                {
+                    string fileName = kvp.Key;
+                    string filePath = kvp.Value;
+
+                    if (File.Exists(filePath))
+                    {
+                        // Gửi tên file trước
+                        serverSocket.SendMessageToClient(targetIP, $"FILENAME|{fileName}");
+                        Thread.Sleep(300); // Đợi client nhận tên file
+
+                        // Sau đó gửi nội dung file
+                        byte[] bytes = File.ReadAllBytes(filePath);
+                        serverSocket.SendFileToClient(targetIP, bytes);
+
+                        Thread.Sleep(500); // Đợi giữa các file
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Không hiển thị lỗi để không làm gián đoạn quá trình copy
+                Console.WriteLine($"Lỗi khi gửi đề thi đến {targetIP}: {ex.Message}");
+            }
         }
     }
 }

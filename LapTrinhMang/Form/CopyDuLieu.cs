@@ -137,6 +137,10 @@ namespace LapTrinhMang
                 // 2. Nếu máy nguồn còn kết nối, yêu cầu gửi dữ liệu bài làm
                 if (mayNguon.IsConnected && serverSocket != null)
                 {
+                    // QUAN TRỌNG: Gọi callback TRƯỚC để thiết lập copyDataTarget trước khi gửi yêu cầu
+                    // Điều này đảm bảo khi file đến, server đã biết cần chuyển tiếp đến đâu
+                    onCopyComplete?.Invoke(mayNguon.IP, mayDich.IP);
+                    
                     // Yêu cầu máy nguồn gửi dữ liệu với flag COPY_DATA
                     serverSocket.SendMessageToClient(mayNguon.IP, $"COPY_DATA_REQUEST|{mayDich.IP}");
                     
@@ -150,6 +154,9 @@ namespace LapTrinhMang
                 else
                 {
                     // Nếu máy nguồn không kết nối, chỉ copy thông tin sinh viên
+                    // Vẫn gọi callback để cập nhật danh sách máy
+                    onCopyComplete?.Invoke(mayNguon.IP, mayDich.IP);
+                    
                     MessageBox.Show(
                         $"Đã copy thông tin sinh viên từ máy {mayNguon.IP} sang máy {mayDich.IP}.\n\n" +
                         $"Máy nguồn không kết nối nên không thể copy dữ liệu bài làm.",
@@ -157,9 +164,6 @@ namespace LapTrinhMang
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
                 }
-
-                // 3. Gọi callback để cập nhật danh sách máy
-                onCopyComplete?.Invoke(mayNguon.IP, mayDich.IP);
 
                 // 4. Đóng form
                 this.DialogResult = DialogResult.OK;
