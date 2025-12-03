@@ -212,6 +212,28 @@ namespace Client
                             ThuHoiDeThi();
                         }));
                     }
+                    else if (msg.StartsWith("DIEMDANH|"))
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            string mssv = msg.Substring("DIEMDANH|".Length);
+                            var sv = dsSinhVienClient.FirstOrDefault(s => s.MSSV == mssv);
+
+                            string hoTen = sv != null ? sv.HoTen : "Sinh viên không có trong danh sách";
+                            MessageBox.Show($"Điểm danh thành công cho {hoTen} ({mssv})!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }));
+                        
+                    }
+                    else if (msg.StartsWith("DIEMDANH_DA_CO|"))
+                    {
+                        string mssv = msg.Substring("DIEMDANH_DA_CO|".Length);
+                        if (sinhVienDaChon != null && sinhVienDaChon.MSSV == mssv)
+                        {
+                            MessageBox.Show($"{sinhVienDaChon.HoTen} ({mssv}) đã được điểm danh trước đó!",
+                                "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            btnĐiemDanh.Enabled = true;
+                        }
+                    }
                 };
 
                 socket.OnReceiveFile += (duLieuFile) =>
@@ -299,7 +321,7 @@ namespace Client
                 string mssv = sinhVienDaChon.MSSV;
                 socket.SendMessage($"DIEMDANH|{mssv}");
 
-                MessageBox.Show($"Đã gửi điểm danh cho {sinhVienDaChon.HoTen} ({mssv})!");
+                //MessageBox.Show($"Đã gửi điểm danh cho {sinhVienDaChon.HoTen} ({mssv})!");
                 btnĐiemDanh.Enabled = false;
             }
             catch (Exception ex)

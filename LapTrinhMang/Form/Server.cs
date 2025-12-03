@@ -139,14 +139,34 @@ namespace LapTrinhMang
             {
                 Invoke(new Action(() =>
                 {
-                    // 1. Kiểm tra tin nhắn Điểm danh: Format: "DIEMDANH|{JSON_StudentInfo}"
+                    // Kiểm tra tin nhắn Điểm danh: Format: "DIEMDANH|{JSON_StudentInfo}"
                     if (msg.StartsWith("DIEMDANH|"))
                     {
                         string mssv = msg.Split(new[] { '|' }, 2)[1].Trim();
 
                         if (string.IsNullOrEmpty(mssv))
                         {
-                            MessageBox.Show("Gói điểm danh không hợp lệ (MSSV rỗng).");
+                            return;
+                        }
+                        string today = DateTime.Now.ToString("ddMMyyyy");
+                        string currentDir = Directory.GetCurrentDirectory();
+
+                        // Kiểm tra sinh viên đã điểm danh chưa
+                        string logFileName = $"DiemDanh-{today}.txt";
+                        string solutionDir = Path.GetFullPath(Path.Combine(currentDir, @"..\..\.."));
+                        string logFilePath = Path.Combine(solutionDir, logFileName);
+
+                        bool daDiemDanh = false;
+                        if (File.Exists(logFilePath))
+                        {
+                            var lines = File.ReadAllLines(logFilePath);
+                            daDiemDanh = lines.Any(line => line.StartsWith(mssv + ","));
+                        }
+
+                        if (daDiemDanh)
+                        {
+                            // Nếu đã điểm danh rồi, gửi thông báo hoặc ignore
+                            serverSocket.SendMessageToClient(ip, $"DIEMDANH_DA_CO|{mssv}");
                             return;
                         }
 
@@ -166,6 +186,7 @@ namespace LapTrinhMang
                         string hoTen = sv != null ? sv.HoTen : "Không tìm thấy tên";
                         string lop = sv != null ? sv.Lop : "N/A";
                         LogDiemDanh(mssv, hoTen, lop);
+                        serverSocket.SendMessageToClient(ip, $"DIEMDANH|{mssv}");
 
                         //if (sv != null)
                         //{
@@ -554,6 +575,13 @@ namespace LapTrinhMang
                 return;
             }
 
+            int soPhut = (int)nupThoiGian.Value;
+            if (soPhut <= 0)
+            {
+                MessageBox.Show("Thời gian phải lớn hơn 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             // Kiểm tra có client nào đang kết nối không
             var dsMayKetNoi = dsMay?.Where(m => m.IsConnected).ToList();
             if (dsMayKetNoi == null || dsMayKetNoi.Count == 0)
@@ -589,6 +617,13 @@ namespace LapTrinhMang
                     serverSocket.BroadcastFile(duLieuFile);
                     Thread.Sleep(500); // Đợi giữa các file
                 }
+                // Tạo thời gian đếm ngược
+                thoiGianConLai = TimeSpan.FromMinutes(soPhut);
+                lblDemTG.Text = thoiGianConLai.ToString(@"hh\:mm\:ss");
+
+                // Gửi lệnh bắt đầu countdown
+                serverSocket.BroadcastMessage($"BATDAU|{soPhut}");
+                timerDemNguoc.Start();
 
                 MessageBox.Show(
                     $"Đã phát {duongDanDeThi.Count} đề thi đến {dsMayKetNoi.Count} client đang kết nối.",
@@ -903,7 +938,7 @@ namespace LapTrinhMang
                     $"Lỗi khi thu hồi đề thi: {ex.Message}",
                     "Lỗi",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                    MessageBoxIcon.Error);  
             }
         }
     }
