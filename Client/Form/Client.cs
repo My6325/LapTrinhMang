@@ -145,24 +145,10 @@ namespace Client
                             MessageBox.Show($"Bài thi bắt đầu! Thời gian: {soPhut} phút", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }));
                     }
-                    else if (msg.StartsWith("TIME|"))
-                    {
-                        double seconds = double.Parse(msg.Split('|')[1]);
-                        int phut = (int)(seconds / 60);
-                        int giay = (int)(seconds % 60);
-                    }
                     else if (msg == "HETGIO")
                     {
                         Invoke(new Action(() =>
                         {
-                            MessageBox.Show("Đã hết thời gian làm bài!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        }));
-                    }
-                    else
-                    {
-                        Invoke(new Action(() =>
-                        {
-                            MessageBox.Show("Server gửi: " + msg);
                         }));
                     }
                 };

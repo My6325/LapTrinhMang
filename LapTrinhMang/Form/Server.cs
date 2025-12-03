@@ -32,6 +32,8 @@ namespace LapTrinhMang
         private TimeSpan thoiGianConLai;
         private System.Windows.Forms.Timer timerDemNguoc;
         private DanhSachDiemDanh formDSDD = null;
+        private bool dangGiaHan = false;
+
         public Server()
         {
             InitializeComponent();
@@ -596,26 +598,30 @@ namespace LapTrinhMang
         private void TimerDemNguoc_Tick(object sender, EventArgs e)
         {
             thoiGianConLai = thoiGianConLai.Subtract(TimeSpan.FromSeconds(1));
-            lblDemTG.Text = thoiGianConLai.ToString(@"hh\:mm\:ss");
+            lblDemTG.Text = thoiGianConLai.ToString(@"hh\:mm\:ss"); // Cập nhật trên giao diện Server
 
-            if (thoiGianConLai.TotalSeconds <= 0)
+            if (!dangGiaHan && thoiGianConLai.TotalSeconds == 0)
+            {
+                dangGiaHan = true;
+                serverSocket.BroadcastMessage("HETGIO");
+
+                MessageBox.Show("Đã hết thời gian làm bài.\nBạn có 1 phút để lưu bài!",
+                    "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                // Bắt đầu đếm ngược 1 phút gia hạn
+                thoiGianConLai = TimeSpan.FromSeconds(60);
+                return;
+            }
+
+            // Nếu hết thời gian gia hạn
+            if (dangGiaHan && thoiGianConLai.TotalSeconds == 0)
             {
                 timerDemNguoc.Stop();
                 lblDemTG.Text = "00:00:00";
 
                 serverSocket.BroadcastMessage("YEUCAU_NOPBAI");
-                MessageBox.Show("Hết giờ! Đã gửi yêu cầu thu bài cho tất cả Client.", "Hết giờ", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
             }
-        }
-
-        private void btnThuBai_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Đã gửi yêu cầu thu bài cho tất cả Client!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            timerDemNguoc.Stop();
-
-            lblDemTG.Text = "00:00:00";
-            serverSocket.BroadcastMessage("YEUCAU_NOPBAI");
-            thoiGianConLai = TimeSpan.FromSeconds(0);
         }
 
         private void LogDiemDanh(string mssv, string hoTen, string lop)

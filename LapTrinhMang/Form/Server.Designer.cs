@@ -43,7 +43,6 @@
             this.btnThem = new System.Windows.Forms.Button();
             this.btnXoa = new System.Windows.Forms.Button();
             this.btnPhatDe = new System.Windows.Forms.Button();
-            this.btnThuBai = new System.Windows.Forms.Button();
             this.lblTG = new System.Windows.Forms.Label();
             this.nupThoiGian = new System.Windows.Forms.NumericUpDown();
             this.lblTGConLai = new System.Windows.Forms.Label();
@@ -202,17 +201,6 @@
             this.btnPhatDe.UseVisualStyleBackColor = true;
             this.btnPhatDe.Click += new System.EventHandler(this.btnPhatDe_Click);
             // 
-            // btnThuBai
-            // 
-            this.btnThuBai.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnThuBai.Location = new System.Drawing.Point(351, 382);
-            this.btnThuBai.Name = "btnThuBai";
-            this.btnThuBai.Size = new System.Drawing.Size(88, 33);
-            this.btnThuBai.TabIndex = 13;
-            this.btnThuBai.Text = "Thu bài";
-            this.btnThuBai.UseVisualStyleBackColor = true;
-            this.btnThuBai.Click += new System.EventHandler(this.btnThuBai_Click);
-            // 
             // lblTG
             // 
             this.lblTG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -330,7 +318,6 @@
             this.Controls.Add(this.nupThoiGian);
             this.Controls.Add(this.lblTG);
             this.Controls.Add(this.btnGuiTN);
-            this.Controls.Add(this.btnThuBai);
             this.Controls.Add(this.btnPhatDe);
             this.Controls.Add(this.btnXoa);
             this.Controls.Add(this.btnThem);
@@ -374,7 +361,6 @@
         private System.Windows.Forms.Button btnThem;
         private System.Windows.Forms.Button btnXoa;
         private System.Windows.Forms.Button btnPhatDe;
-        private System.Windows.Forms.Button btnThuBai;
         private System.Windows.Forms.Label lblTG;
         private System.Windows.Forms.NumericUpDown nupThoiGian;
         private System.Windows.Forms.Label lblTGConLai;
