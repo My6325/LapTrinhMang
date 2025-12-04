@@ -29,7 +29,8 @@ namespace LapTrinhMang
         private Dictionary<string, string> duongDanDeThi = new Dictionary<string, string>();//ListBox hiển thị tên file, Dictionary lưu đường dẫn thật để gửi
         private Dictionary<string, string> duongDanBaiLam = new Dictionary<string, string>();
         private Dictionary<string, string> dichCopyDuLieu = new Dictionary<string, string>(); // IP nguồn -> IP đích cho copy data
-        private Dictionary<string, string> tenFileCopyDuLieu = new Dictionary<string, string>(); // IP nguồn -> tên file hiện tại đang copy 
+        private Dictionary<string, string> tenFileCopyDuLieu = new Dictionary<string, string>(); // IP nguồn -> tên file hiện tại đang copy
+        private Dictionary<string, bool> daGuiFileDauTienCopy = new Dictionary<string, bool>(); // IP nguồn -> đã gửi file đầu tiên trong copy chưa 
         private TimeSpan thoiGianConLai;
         private System.Windows.Forms.Timer timerDemNguoc;
         private DanhSachDiemDanh formDSDD = null;
@@ -129,7 +130,31 @@ namespace LapTrinhMang
                     var may = dsMay.FirstOrDefault(x => x.IP == ip);
                     if (may != null)
                     {
-                        may.IsConnected = false;
+                        // Xóa client khỏi danh sách khi ngắt kết nối
+                        dsMay.Remove(may);
+                        
+                        // Dọn dẹp các dictionary liên quan đến client này
+                        if (dichCopyDuLieu.ContainsKey(ip))
+                        {
+                            dichCopyDuLieu.Remove(ip);
+                        }
+                        if (tenFileCopyDuLieu.ContainsKey(ip))
+                        {
+                            tenFileCopyDuLieu.Remove(ip);
+                        }
+                        if (daGuiFileDauTienCopy.ContainsKey(ip))
+                        {
+                            daGuiFileDauTienCopy.Remove(ip);
+                        }
+                        if (duongDanDeThi.ContainsKey(ip))
+                        {
+                            duongDanDeThi.Remove(ip);
+                        }
+                        if (duongDanBaiLam.ContainsKey(ip))
+                        {
+                            duongDanBaiLam.Remove(ip);
+                        }
+                        
                         LoadDanhSachMay();
                     }
                 }));
@@ -234,6 +259,9 @@ namespace LapTrinhMang
                             string ipDich = dichCopyDuLieu[ip];
                             string jsonSinhVien = msg.Substring("COPY_STUDENT_INFO|".Length).Trim();
 
+                            // Reset flag cho file đầu tiên khi bắt đầu copy
+                            daGuiFileDauTienCopy[ip] = false;
+
                             // Chuyển tiếp thông tin sinh viên đến máy đích
                             var mayDich = dsMay?.FirstOrDefault(x => x.IP == ipDich);
                             if (mayDich != null && mayDich.IsConnected)
@@ -244,25 +272,23 @@ namespace LapTrinhMang
                     }
                     else if (msg == "COPY_DATA_COMPLETE")
                     {
-                        // Máy nguồn đã gửi xong tất cả dữ liệu (bài làm + các file đề thi)
+                        // Máy nguồn đã gửi xong tất cả dữ liệu (các file đề thi)
                         if (dichCopyDuLieu.ContainsKey(ip))
                         {
                             string ipDich = dichCopyDuLieu[ip];
                             dichCopyDuLieu.Remove(ip); // Xóa sau khi hoàn thành
 
-                            // Xóa tên file khỏi dictionary nếu còn
+                            // Xóa các dictionary liên quan
                             if (tenFileCopyDuLieu.ContainsKey(ip))
                             {
                                 tenFileCopyDuLieu.Remove(ip);
                             }
+                            if (daGuiFileDauTienCopy.ContainsKey(ip))
+                            {
+                                daGuiFileDauTienCopy.Remove(ip);
+                            }
 
-                            // Hiển thị thông báo thành công
-                            MessageBox.Show(
-                                $"Đã copy dữ liệu từ máy {ip} sang máy {ipDich} thành công!\n" +
-                                $"Bao gồm: Bài làm (ZIP) và các file đề thi từ thư mục phát đề.",
-                                "Thành công",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
+                            // Không hiển thị thông báo (theo yêu cầu)
                         }
                     }
 
@@ -317,13 +343,15 @@ namespace LapTrinhMang
                                     tenFileCopyDuLieu.Remove(ip);
                                 }
                                 
-                                // Kiểm tra xem đây có phải là file đầu tiên (bài làm ZIP) không
-                                bool laFileDauTien = duongDanBaiLam.ContainsKey(ip);
+                                // Kiểm tra xem đây có phải là file đầu tiên trong quá trình copy không
+                                bool laFileDauTien = !daGuiFileDauTienCopy.ContainsKey(ip) || !daGuiFileDauTienCopy[ip];
+                                
+                                // Nếu là file đầu tiên trong copy dữ liệu, gửi đường dẫn lưu
                                 if (laFileDauTien)
                                 {
-                                    duongDanBaiLam.Remove(ip);
+                                    daGuiFileDauTienCopy[ip] = true;
                                     
-                                    // Đây là file bài làm (ZIP) - gửi đường dẫn lưu trước
+                                    // Gửi đường dẫn lưu đề thi (từ txtGuiDeThi) cho máy đích
                                     string linkDeThi = txtGuiDeThi.Text;
                                     if (!string.IsNullOrEmpty(linkDeThi))
                                     {
@@ -664,8 +692,8 @@ namespace LapTrinhMang
                 dangGiaHan = true;
                 serverSocket.BroadcastMessage("HETGIO");
 
-                MessageBox.Show("Đã hết thời gian làm bài.\nBạn có 1 phút để lưu bài!",
-                    "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Đã hết thời gian làm bài",
+                    "Thông báo", MessageBoxButtons.OK);
 
                 // Bắt đầu đếm ngược 1 phút gia hạn
                 thoiGianConLai = TimeSpan.FromSeconds(60);
@@ -911,18 +939,32 @@ namespace LapTrinhMang
 
         private void btnThuLaiDe_Click(object sender, EventArgs e)
         {
+            // Kiểm tra có đề thi nào trong danh sách không
+            if (lboxDSDeThi.Items.Count == 0)
+            {
+                MessageBox.Show("Không có đề thi nào trong danh sách để thu hồi!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Lấy danh sách tên file từ lboxDSDeThi
+            List<string> danhSachTenFile = new List<string>();
+            foreach (var item in lboxDSDeThi.Items)
+            {
+                danhSachTenFile.Add(item.ToString());
+            }
             // Xác nhận trước khi thu hồi
+            string danhSachFile = string.Join(", ", danhSachTenFile);
             DialogResult result = MessageBox.Show(
-                "Bạn có chắc muốn thu hồi toàn bộ đề thi đã phát cho tất cả client?\n\n" +
-                "Tất cả file đề thi trong thư mục đề thi của client sẽ bị xóa.\n" +
-                "Thời gian làm bài sẽ được reset về 0.",
+                $"Bạn có chắc muốn thu hồi các đề thi sau cho tất cả client?\n\n" +
+                $"Danh sách đề thi:\n{danhSachFile}\n\n" +
+                $"Các file đề thi này trong thư mục đề thi của client sẽ bị xóa.\n" +
+                $"Thời gian làm bài sẽ được reset về 0.",
                 "Xác nhận thu hồi đề thi",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);
 
             if (result != DialogResult.Yes)
                 return;
-
             try
             {
                 // Reset thời gian về 0
@@ -931,15 +973,9 @@ namespace LapTrinhMang
                 dangGiaHan = false;
                 lblDemTG.Text = "00:00:00";
 
-                // Gửi yêu cầu thu hồi đề thi đến tất cả client
-                serverSocket.BroadcastMessage("THU_HOI_DE_THI");
-
-                MessageBox.Show(
-                    "Đã gửi yêu cầu thu hồi đề thi đến tất cả client đang kết nối.\n" +
-                    "Thời gian làm bài đã được reset về 0.",
-                    "Thông báo",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                // Gửi yêu cầu thu hồi đề thi với danh sách tên file (không hiển thị thông báo)
+                string danhSachFileJson = JsonSerializer.Serialize(danhSachTenFile);
+                serverSocket.BroadcastMessage($"THU_HOI_DE_THI|{danhSachFileJson}");
             }
             catch (Exception ex)
             {

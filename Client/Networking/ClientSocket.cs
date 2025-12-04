@@ -154,6 +154,7 @@ namespace Client.Networking
 
             stream.Write(headerBytes, 0, headerBytes.Length);
             stream.Write(data, 0, data.Length);
+            stream.Flush(); // Đảm bảo dữ liệu được gửi ngay
         }
 
         public void Disconnect()

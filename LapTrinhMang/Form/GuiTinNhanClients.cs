@@ -118,6 +118,13 @@ namespace LapTrinhMang
                         return;
                     }
 
+                    // Kiểm tra lại IP trước khi gửi
+                    if (string.IsNullOrEmpty(may.IP))
+                    {
+                        MessageBox.Show($"IP của máy không hợp lệ!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
                     serverSocket.SendMessageToClient(may.IP, message);
                     MessageBox.Show($"Đã gửi tin nhắn đến {may.HoTen} ({may.MSSV}) - IP: {may.IP}!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }

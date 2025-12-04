@@ -209,14 +209,34 @@ namespace Client
                     {
                         Invoke(new Action(() =>
                         {
+                            MessageBox.Show("Đã hết thời gian làm bài.\nBạn có 1 phút để lưu bài!",
+                    "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }));
                     }
-                    else if (msg == "THU_HOI_DE_THI")
+                    else if (msg.StartsWith("THU_HOI_DE_THI"))
                     {
-                        // Thu hồi đề thi: xóa tất cả file trong thư mục đề thi
+                        // Thu hồi đề thi: xóa các file đề thi được chỉ định
                         Invoke(new Action(() =>
                         {
-                            ThuHoiDeThi();
+                            if (msg.Contains("|"))
+                            {
+                                // Có danh sách file cụ thể
+                                string jsonDanhSachFile = msg.Substring("THU_HOI_DE_THI|".Length);
+                                try
+                                {
+                                    var danhSachTenFile = JsonSerializer.Deserialize<List<string>>(jsonDanhSachFile);
+                                    ThuHoiDeThi(danhSachTenFile);
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show($"Lỗi khi parse danh sách file: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+                            }
+                            else
+                            {
+                                // Không có danh sách, xóa tất cả (tương thích với code cũ)
+                                ThuHoiDeThi(null);
+                            }
                         }));
                     }
                     else if (msg.StartsWith("DIEMDANH|"))
@@ -255,6 +275,21 @@ namespace Client
                                 CapNhatGiaoDien(false);
 
                                 MessageBox.Show("Server đã yêu cầu ngắt kết nối.", "Ngắt kết nối", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                        }));
+                    }
+                    else
+                    {
+                        // Tin nhắn thông thường - hiển thị MessageBox
+                        Invoke(new Action(() =>
+                        {
+                            try
+                            {
+                                MessageBox.Show(msg, "Tin nhắn từ Server", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Lỗi khi hiển thị tin nhắn: {ex.Message}");
                             }
                         }));
                     }
@@ -478,6 +513,14 @@ namespace Client
 
                 // Gửi tín hiệu hoàn thành copy
                 socket.SendMessage("COPY_DATA_COMPLETE");
+                
+                // Đợi lâu hơn để đảm bảo tất cả dữ liệu đã được gửi hoàn toàn
+                // Đặc biệt quan trọng khi có nhiều file lớn
+                Thread.Sleep(1000);
+                
+                // Xóa dữ liệu sau khi đã gửi thành công
+                // Không dùng Invoke vì đã ở UI thread
+                XoaDuLieuDaCopy();
             }
             catch (Exception ex)
             {
@@ -486,9 +529,9 @@ namespace Client
         }
 
         /// <summary>
-        /// Thu hồi đề thi: xóa tất cả file trong thư mục đề thi
+        /// Xóa dữ liệu sau khi đã copy sang máy đích
         /// </summary>
-        private void ThuHoiDeThi()
+        private void XoaDuLieuDaCopy()
         {
             try
             {
@@ -498,22 +541,176 @@ namespace Client
 
                 if (!Directory.Exists(thuMucDeThi))
                 {
-                    MessageBox.Show("Thư mục đề thi không tồn tại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Console.WriteLine($"Thư mục không tồn tại: {thuMucDeThi}");
                     return;
                 }
 
-                // Lấy danh sách tất cả file trong thư mục
+                // Lấy danh sách tất cả file trong thư mục (bao gồm cả file ZIP)
                 string[] danhSachFile = Directory.GetFiles(thuMucDeThi);
                 int soLuongFile = danhSachFile.Length;
 
                 if (soLuongFile == 0)
                 {
-                    return; // Không có file nào, không cần thông báo
+                    Console.WriteLine("Không có file nào để xóa.");
+                    return;
                 }
 
-                // Xóa tất cả file (không cần xác nhận)
+                Console.WriteLine($"Bắt đầu xóa {soLuongFile} file từ thư mục: {thuMucDeThi}");
+
+                // Xóa tất cả file (bao gồm cả file ZIP)
                 int soFileDaXoa = 0;
+                List<string> danhSachFileLoi = new List<string>();
+                
                 foreach (string duongDanFile in danhSachFile)
+                {
+                    try
+                    {
+                        // Kiểm tra file có tồn tại không
+                        if (!File.Exists(duongDanFile))
+                        {
+                            continue;
+                        }
+
+                        // Thử xóa file nhiều lần nếu file đang được sử dụng
+                        int soLanThu = 0;
+                        bool daXoaThanhCong = false;
+                        int delayTime = 500; // Tăng thời gian đợi giữa các lần thử
+                        
+                        while (soLanThu < 5 && !daXoaThanhCong) // Tăng số lần thử lên 5
+                        {
+                            try
+                            {
+                                // Đảm bảo file không đang được sử dụng
+                                using (FileStream fs = File.Open(duongDanFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                                {
+                                    fs.Close();
+                                }
+                                
+                                File.Delete(duongDanFile);
+                                daXoaThanhCong = true;
+                                soFileDaXoa++;
+                                Console.WriteLine($"Đã xóa file: {Path.GetFileName(duongDanFile)}");
+                            }
+                            catch (IOException)
+                            {
+                                // File đang được sử dụng, đợi một chút rồi thử lại
+                                soLanThu++;
+                                if (soLanThu < 5)
+                                {
+                                    Thread.Sleep(delayTime);
+                                    delayTime += 200; // Tăng dần thời gian đợi
+                                }
+                                Console.WriteLine($"Lần thử {soLanThu}: File đang được sử dụng, đợi {delayTime}ms...");
+                            }
+                            catch (UnauthorizedAccessException)
+                            {
+                                // Không có quyền xóa file
+                                danhSachFileLoi.Add(Path.GetFileName(duongDanFile));
+                                Console.WriteLine($"Không có quyền xóa file: {Path.GetFileName(duongDanFile)}");
+                                break;
+                            }
+                        }
+                        
+                        if (!daXoaThanhCong)
+                        {
+                            danhSachFileLoi.Add(Path.GetFileName(duongDanFile));
+                            Console.WriteLine($"Không thể xóa file sau {soLanThu} lần thử: {Path.GetFileName(duongDanFile)}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        danhSachFileLoi.Add(Path.GetFileName(duongDanFile));
+                        Console.WriteLine($"Lỗi khi xóa file {Path.GetFileName(duongDanFile)}: {ex.Message}");
+                    }
+                }
+
+                // Xóa tên file hiển thị trên form
+                txtDeThi.Text = "";
+
+                // Hiển thị thông báo kết quả
+                string thongBao = $"Đã xóa {soFileDaXoa}/{soLuongFile} file sau khi copy dữ liệu sang máy đích.";
+                if (danhSachFileLoi.Count > 0)
+                {
+                    thongBao += $"\n\nKhông thể xóa {danhSachFileLoi.Count} file:\n" + string.Join("\n", danhSachFileLoi);
+                }
+                
+                MessageBox.Show(
+                    thongBao,
+                    soFileDaXoa == soLuongFile ? "Thành công" : "Cảnh báo",
+                    MessageBoxButtons.OK,
+                    soFileDaXoa == soLuongFile ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Lỗi khi xóa dữ liệu đã copy: {ex.Message}",
+                    "Lỗi",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                Console.WriteLine($"Lỗi trong XoaDuLieuDaCopy: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Thu hồi đề thi: xóa các file đề thi được chỉ định trong danh sách
+        /// </summary>
+        /// <param name="danhSachTenFile">Danh sách tên file cần xóa. Nếu null, xóa tất cả file đề thi</param>
+        private void ThuHoiDeThi(List<string> danhSachTenFile)
+        {
+            try
+            {
+                string thuMucDeThi = string.IsNullOrEmpty(duongDanLuuHienTai)
+                    ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DefaultDeThi")
+                    : duongDanLuuHienTai;
+
+                if (!Directory.Exists(thuMucDeThi))
+                {
+                    // Thư mục không tồn tại, không cần thông báo
+                    return;
+                }
+
+                // Lấy danh sách tất cả file trong thư mục
+                string[] danhSachFile = Directory.GetFiles(thuMucDeThi);
+                
+                List<string> danhSachFileCanXoa = new List<string>();
+
+                if (danhSachTenFile != null && danhSachTenFile.Count > 0)
+                {
+                    // Chỉ xóa các file có tên trong danh sách (so sánh không phân biệt hoa thường)
+                    foreach (string duongDanFile in danhSachFile)
+                    {
+                        string tenFile = Path.GetFileName(duongDanFile);
+                        // So sánh không phân biệt hoa thường để tránh lỗi
+                        if (danhSachTenFile.Any(x => x.Equals(tenFile, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            danhSachFileCanXoa.Add(duongDanFile);
+                        }
+                    }
+                }
+                else
+                {
+                    // Nếu không có danh sách cụ thể, xóa tất cả file đề thi (tương thích với code cũ)
+                    string[] extensionsDeThi = { ".pdf", ".docx", ".doc", ".txt", ".xlsx", ".xls", ".pptx", ".ppt" };
+                    foreach (string duongDanFile in danhSachFile)
+                    {
+                        string extension = Path.GetExtension(duongDanFile).ToLower();
+                        if (extensionsDeThi.Contains(extension))
+                        {
+                            danhSachFileCanXoa.Add(duongDanFile);
+                        }
+                    }
+                }
+
+                if (danhSachFileCanXoa.Count == 0)
+                {
+                    return;
+                }
+
+                // Xóa các file đã được chỉ định
+                int soFileDaXoa = 0;
+                List<string> danhSachFileLoi = new List<string>();
+                
+                foreach (string duongDanFile in danhSachFileCanXoa)
                 {
                     try
                     {
@@ -522,20 +719,45 @@ namespace Client
                     }
                     catch (Exception ex)
                     {
+                        string tenFile = Path.GetFileName(duongDanFile);
+                        danhSachFileLoi.Add(tenFile);
                         Console.WriteLine($"Không thể xóa file {duongDanFile}: {ex.Message}");
                     }
                 }
 
-                // Xóa tên file hiển thị trên form
-                txtDeThi.Text = "";
+                // Kiểm tra xem còn file đề thi nào trong thư mục không
+                string[] danhSachFileConLai = Directory.GetFiles(thuMucDeThi);
+                bool conFileDeThi = false;
+                if (danhSachTenFile != null && danhSachTenFile.Count > 0)
+                {
+                    // Kiểm tra xem còn file nào trong danh sách không
+                    conFileDeThi = danhSachFileConLai.Any(f => 
+                        danhSachTenFile.Any(x => x.Equals(Path.GetFileName(f), StringComparison.OrdinalIgnoreCase)));
+                }
+                else
+                {
+                    // Kiểm tra xem còn file đề thi nào không
+                    string[] extensionsDeThi = { ".pdf", ".docx", ".doc", ".txt", ".xlsx", ".xls", ".pptx", ".ppt" };
+                    conFileDeThi = danhSachFileConLai.Any(f => 
+                        extensionsDeThi.Contains(Path.GetExtension(f).ToLower()));
+                }
+
+                // Xóa tên file hiển thị trên form nếu không còn file đề thi nào
+                if (!conFileDeThi)
+                {
+                    txtDeThi.Text = "";
+                }
+
+                // Không hiển thị thông báo, chỉ ghi log nếu có lỗi
+                if (danhSachFileLoi.Count > 0)
+                {
+                    Console.WriteLine($"Không thể xóa {danhSachFileLoi.Count} file: {string.Join(", ", danhSachFileLoi)}");
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Lỗi khi thu hồi đề thi: {ex.Message}",
-                    "Lỗi",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                // Chỉ ghi log lỗi, không hiển thị thông báo
+                Console.WriteLine($"Lỗi khi thu hồi đề thi: {ex.Message}");
             }
         }
 

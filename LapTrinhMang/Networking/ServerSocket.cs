@@ -209,6 +209,7 @@ namespace LapTrinhMang.Networking
 
                     stream.Write(headerBytes, 0, headerBytes.Length);
                     stream.Write(data, 0, data.Length);
+                    stream.Flush();
                 }
                 catch (Exception ex)
                 {
@@ -234,6 +235,7 @@ namespace LapTrinhMang.Networking
 
                         stream.Write(headerBytes, 0, headerBytes.Length);
                         stream.Write(data, 0, data.Length);
+                        stream.Flush();
                     }
                     catch
                     {

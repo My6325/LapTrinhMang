@@ -112,6 +112,54 @@ namespace LapTrinhMang
                 return;
             }
 
+            // Kiểm tra máy nguồn đã điểm danh chưa
+            if (string.IsNullOrEmpty(mayNguon.MSSV) || mayNguon.MSSV == "Mới/Chưa ĐD")
+            {
+                MessageBox.Show(
+                    $"Máy nguồn ({mayNguon.IP}) chưa điểm danh!\n\n" +
+                    $"Vui lòng yêu cầu máy này điểm danh trước khi copy dữ liệu.",
+                    "Cảnh báo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Kiểm tra máy đích đã điểm danh chưa
+            if (string.IsNullOrEmpty(mayDich.MSSV) || mayDich.MSSV == "Mới/Chưa ĐD")
+            {
+                MessageBox.Show(
+                    $"Máy đích ({mayDich.IP}) chưa điểm danh!\n\n" +
+                    $"Vui lòng yêu cầu máy này điểm danh trước khi copy dữ liệu.",
+                    "Cảnh báo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Kiểm tra máy nguồn đã kết nối chưa
+            if (!mayNguon.IsConnected)
+            {
+                MessageBox.Show(
+                    $"Máy nguồn ({mayNguon.IP}) chưa kết nối đến server!\n\n" +
+                    $"Vui lòng đảm bảo máy này đã kết nối trước khi copy dữ liệu.",
+                    "Cảnh báo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Kiểm tra máy đích đã kết nối chưa
+            if (!mayDich.IsConnected)
+            {
+                MessageBox.Show(
+                    $"Máy đích ({mayDich.IP}) chưa kết nối đến server!\n\n" +
+                    $"Vui lòng đảm bảo máy này đã kết nối trước khi copy dữ liệu.",
+                    "Cảnh báo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
             // Xác nhận
             DialogResult result = MessageBox.Show(
                 $"Bạn có chắc muốn copy dữ liệu từ máy {mayNguon.IP} ({mayNguon.MSSV}) sang máy {mayDich.IP}?\n\n" +
@@ -134,35 +182,21 @@ namespace LapTrinhMang
                 mayDich.HoTen = mayNguon.HoTen;
                 // Giữ nguyên IP của máy đích
 
-                // 2. Nếu máy nguồn còn kết nối, yêu cầu gửi dữ liệu bài làm
-                if (mayNguon.IsConnected && serverSocket != null)
+                // 2. Yêu cầu máy nguồn gửi dữ liệu bài làm (đã kiểm tra kết nối ở trên)
+                if (serverSocket != null)
                 {
                     // QUAN TRỌNG: Gọi callback TRƯỚC để thiết lập copyDataTarget trước khi gửi yêu cầu
                     // Điều này đảm bảo khi file đến, server đã biết cần chuyển tiếp đến đâu
                     onCopyComplete?.Invoke(mayNguon.IP, mayDich.IP);
                     
-                    // Yêu cầu máy nguồn gửi dữ liệu với flag COPY_DATA
+                    // Yêu cầu máy nguồn gửi dữ liệu với flag COPY_DATA (không hiển thị thông báo)
                     serverSocket.SendMessageToClient(mayNguon.IP, $"COPY_DATA_REQUEST|{mayDich.IP}");
-                    
-                    MessageBox.Show(
-                        $"Đã yêu cầu máy nguồn ({mayNguon.IP}) gửi dữ liệu bài làm sang máy {mayDich.IP}.\n" +
-                        $"Dữ liệu sẽ được tự động chuyển tiếp khi nhận được.",
-                        "Thông báo",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
                 }
                 else
                 {
-                    // Nếu máy nguồn không kết nối, chỉ copy thông tin sinh viên
+                    // Nếu serverSocket null, chỉ copy thông tin sinh viên
                     // Vẫn gọi callback để cập nhật danh sách máy
                     onCopyComplete?.Invoke(mayNguon.IP, mayDich.IP);
-                    
-                    MessageBox.Show(
-                        $"Đã copy thông tin sinh viên từ máy {mayNguon.IP} sang máy {mayDich.IP}.\n\n" +
-                        $"Máy nguồn không kết nối nên không thể copy dữ liệu bài làm.",
-                        "Thông báo",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
                 }
 
                 // 4. Đóng form
