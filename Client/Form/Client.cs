@@ -315,12 +315,25 @@ namespace Client
                                 ? $"DeThi_{DateTime.Now:yyyyMMdd_HHmmss}.pdf"
                                 : tenFileHienTai;
 
+                            // Tạo đường dẫn đầy đủ, bao gồm cả thư mục con nếu có
                             string duongDanFile = Path.Combine(thuMuc, tenFile);
+                            
+                            // Tạo thư mục cha nếu chưa tồn tại (để hỗ trợ thư mục con)
+                            string thuMucCha = Path.GetDirectoryName(duongDanFile);
+                            if (!string.IsNullOrEmpty(thuMucCha) && !Directory.Exists(thuMucCha))
+                            {
+                                Directory.CreateDirectory(thuMucCha);
+                            }
+
                             File.WriteAllBytes(duongDanFile, duLieuFile);
                             Console.WriteLine($"Đã lưu file: {duongDanFile}");
 
-                            string tenFileHienThi = Path.GetFileName(tenFile);
-                            txtDeThi.Text = tenFileHienThi;
+                            // Chỉ hiển thị tên file gốc (không có đường dẫn) nếu là file ở thư mục gốc
+                            if (!tenFile.Contains("\\") && !tenFile.Contains("/"))
+                            {
+                                string tenFileHienThi = Path.GetFileName(tenFile);
+                                txtDeThi.Text = tenFileHienThi;
+                            }
 
                             tenFileHienTai = "";
                             //duongDanLuuHienTai = "";
@@ -493,8 +506,8 @@ namespace Client
                     Thread.Sleep(300);
                 }
 
-                // Gửi các file từ thư mục phát đề (không nén)
-                string[] danhSachFile = Directory.GetFiles(thuMucNguon);
+                // Gửi các file từ thư mục phát đề (bao gồm cả thư mục con)
+                string[] danhSachFile = Directory.GetFiles(thuMucNguon, "*", SearchOption.AllDirectories);
                 int soLuongFile = 0;
                 int soLuongFileDaGui = 0;
 
@@ -504,14 +517,23 @@ namespace Client
                     if (Path.GetExtension(duongDanFile).Equals(".zip", StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    string tenFile = Path.GetFileName(duongDanFile);
+                    // Tính đường dẫn tương đối từ thư mục gốc để giữ nguyên cấu trúc thư mục
+                    string duongDanTuongDoi = duongDanFile;
+                    if (duongDanFile.StartsWith(thuMucNguon, StringComparison.OrdinalIgnoreCase))
+                    {
+                        duongDanTuongDoi = duongDanFile.Substring(thuMucNguon.Length);
+                        if (duongDanTuongDoi.StartsWith("\\") || duongDanTuongDoi.StartsWith("/"))
+                        {
+                            duongDanTuongDoi = duongDanTuongDoi.Substring(1);
+                        }
+                    }
                     
                     try
                     {
                         byte[] duLieuFile = File.ReadAllBytes(duongDanFile);
 
-                        // Gửi tên file trước
-                        socket.SendMessage($"FILENAME|{tenFile}");
+                        // Gửi đường dẫn tương đối (bao gồm cả thư mục con nếu có) trước
+                        socket.SendMessage($"FILENAME|{duongDanTuongDoi}");
                         Thread.Sleep(300);
 
                         // Gửi nội dung file
