@@ -805,6 +805,13 @@ namespace LapTrinhMang
             ClientInfo clientInfo = GetClientInfoFromContextMenu();
             if (clientInfo == null) return;
 
+            // Kiểm tra máy có kết nối đến server không
+            if (!clientInfo.IsConnected)
+            {
+                MessageBox.Show("Máy không có kết nối Server", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             // Mở form Copy dữ liệu với thông tin client
             if (serverSocket == null || dsMay == null)
             {
