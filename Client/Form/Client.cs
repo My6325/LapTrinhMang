@@ -118,13 +118,13 @@ namespace Client
                         duongDanLuuHienTai = msg.Substring("SAVEPATH|".Length).Trim();
                         Invoke(new Action(() =>
                         {
-                            Console.WriteLine($"Đã nhận đường dẫn lưu: {duongDanLuuHienTai}");
+                            Console.WriteLine($"Đã nhận đường dẫn lưu từ server: {duongDanLuuHienTai}");
                         }));
                     }
                     else if (msg.StartsWith("FILENAME|"))
                     {
                         // Lưu tên file để dùng khi nhận file
-                        tenFileHienTai = msg.Substring("FILENAME|".Length);
+                        tenFileHienTai = msg.Substring("FILENAME|".Length).Trim();
                         Invoke(new Action(() =>
                         {
                             Console.WriteLine($"Chuẩn bị nhận file: {tenFileHienTai}");
@@ -147,6 +147,7 @@ namespace Client
                     else if (msg.StartsWith("COPY_STUDENT_INFO|"))
                     {
                         // Nhận thông tin sinh viên từ máy nguồn khi copy dữ liệu
+                        Console.WriteLine($"Nhận COPY_STUDENT_INFO: {msg}");
                         string jsonSinhVien = msg.Substring("COPY_STUDENT_INFO|".Length).Trim();
                         try
                         {
@@ -155,6 +156,7 @@ namespace Client
                             {
                                 Invoke(new Action(() =>
                                 {
+                                    Console.WriteLine($"Đã parse thông tin sinh viên: {sinhVien.MSSV} - {sinhVien.HoTen}");
                                     // Tìm sinh viên trong danh sách
                                     var sinhVienTimThay = dsSinhVienClient.FirstOrDefault(s => s.MSSV == sinhVien.MSSV);
                                     if (sinhVienTimThay != null)
@@ -301,6 +303,7 @@ namespace Client
                     {
                         try
                         {
+                            Console.WriteLine($"Nhận file từ server, kích thước: {duLieuFile.Length} bytes, tên file hiện tại: {tenFileHienTai}");
                             string thuMuc = string.IsNullOrEmpty(duongDanLuuHienTai)
                                 ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DefaultDeThi") // Dùng Documents làm dự phòng
                                 : duongDanLuuHienTai;
@@ -314,18 +317,17 @@ namespace Client
 
                             string duongDanFile = Path.Combine(thuMuc, tenFile);
                             File.WriteAllBytes(duongDanFile, duLieuFile);
+                            Console.WriteLine($"Đã lưu file: {duongDanFile}");
 
                             string tenFileHienThi = Path.GetFileName(tenFile);
-                            Invoke(new Action(() =>
-                            {
-                                txtDeThi.Text = tenFileHienThi;
-                            }));
+                            txtDeThi.Text = tenFileHienThi;
 
                             tenFileHienTai = "";
                             //duongDanLuuHienTai = "";
                         }
                         catch (Exception ex)
                         {
+                            Console.WriteLine($"Lỗi khi lưu file: {ex.Message}");
                             MessageBox.Show($"Lỗi khi lưu file: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }));
@@ -467,13 +469,17 @@ namespace Client
                 MessageBox.Show("Chưa chọn thông tin sinh viên để copy dữ liệu", "Lỗi Copy", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            if (!DaKetNoi) return;
+            if (!DaKetNoi)
+            {
+                MessageBox.Show("Chưa kết nối đến server", "Lỗi Copy", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             string thuMucNguon = duongDanLuuHienTai;
 
             if (string.IsNullOrEmpty(thuMucNguon) || !Directory.Exists(thuMucNguon))
             {
-                MessageBox.Show($"Thư mục phát đề không tồn tại", "Lỗi Copy", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Thư mục phát đề không tồn tại: {thuMucNguon}", "Lỗi Copy", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -490,6 +496,7 @@ namespace Client
                 // Gửi các file từ thư mục phát đề (không nén)
                 string[] danhSachFile = Directory.GetFiles(thuMucNguon);
                 int soLuongFile = 0;
+                int soLuongFileDaGui = 0;
 
                 foreach (string duongDanFile in danhSachFile)
                 {
@@ -498,15 +505,25 @@ namespace Client
                         continue;
 
                     string tenFile = Path.GetFileName(duongDanFile);
-                    byte[] duLieuFile = File.ReadAllBytes(duongDanFile);
+                    
+                    try
+                    {
+                        byte[] duLieuFile = File.ReadAllBytes(duongDanFile);
 
-                    // Gửi tên file trước
-                    socket.SendMessage($"FILENAME|{tenFile}");
-                    Thread.Sleep(300);
+                        // Gửi tên file trước
+                        socket.SendMessage($"FILENAME|{tenFile}");
+                        Thread.Sleep(300);
 
-                    // Gửi nội dung file
-                    socket.SendFile(duLieuFile);
-                    Thread.Sleep(500); // Đợi giữa các file
+                        // Gửi nội dung file
+                        socket.SendFile(duLieuFile);
+                        Thread.Sleep(500); // Đợi giữa các file
+
+                        soLuongFileDaGui++;
+                    }
+                    catch
+                    {
+                        // Tiếp tục gửi các file khác
+                    }
 
                     soLuongFile++;
                 }
@@ -515,12 +532,18 @@ namespace Client
                 socket.SendMessage("COPY_DATA_COMPLETE");
                 
                 // Đợi lâu hơn để đảm bảo tất cả dữ liệu đã được gửi hoàn toàn
-                // Đặc biệt quan trọng khi có nhiều file lớn
                 Thread.Sleep(1000);
                 
                 // Xóa dữ liệu sau khi đã gửi thành công
-                // Không dùng Invoke vì đã ở UI thread
-                XoaDuLieuDaCopy();
+                if (soLuongFileDaGui > 0)
+                {
+                    XoaDuLieuDaCopy();
+                }
+                else
+                {
+                    MessageBox.Show("Không có file nào để copy. Thư mục đề thi có thể rỗng hoặc chỉ chứa file ZIP.", 
+                        "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             catch (Exception ex)
             {

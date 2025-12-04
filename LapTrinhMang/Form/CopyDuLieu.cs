@@ -124,12 +124,13 @@ namespace LapTrinhMang
                 return;
             }
 
-            // Kiểm tra máy đích đã điểm danh chưa
-            if (string.IsNullOrEmpty(mayDich.MSSV) || mayDich.MSSV == "Mới/Chưa ĐD")
+            // Kiểm tra máy đích CHƯA điểm danh (chỉ copy sang máy chưa điểm danh)
+            if (!string.IsNullOrEmpty(mayDich.MSSV) && mayDich.MSSV != "Mới/Chưa ĐD")
             {
                 MessageBox.Show(
-                    $"Máy đích ({mayDich.IP}) chưa điểm danh!\n\n" +
-                    $"Vui lòng yêu cầu máy này điểm danh trước khi copy dữ liệu.",
+                    $"Không thể copy dữ liệu sang máy đích ({mayDich.IP})!\n\n" +
+                    $"Máy đích đã có điểm danh ({mayDich.MSSV} - {mayDich.HoTen}).\n" +
+                    $"Chỉ có thể copy dữ liệu sang máy chưa điểm danh.",
                     "Cảnh báo",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -161,8 +162,12 @@ namespace LapTrinhMang
             }
 
             // Xác nhận
+            string thongTinMayDich = string.IsNullOrEmpty(mayDich.MSSV) || mayDich.MSSV == "Mới/Chưa ĐD"
+                ? "Chưa điểm danh"
+                : $"{mayDich.MSSV} - {mayDich.HoTen}";
+            
             DialogResult result = MessageBox.Show(
-                $"Bạn có chắc muốn copy dữ liệu từ máy {mayNguon.IP} ({mayNguon.MSSV}) sang máy {mayDich.IP}?\n\n" +
+                $"Bạn có chắc muốn copy dữ liệu từ máy {mayNguon.IP} ({mayNguon.MSSV} - {mayNguon.HoTen}) sang máy {mayDich.IP} ({thongTinMayDich})?\n\n" +
                 $"Thông tin sẽ được copy:\n" +
                 $"- MSSV: {mayNguon.MSSV}\n" +
                 $"- Họ tên: {mayNguon.HoTen}\n" +
@@ -185,8 +190,6 @@ namespace LapTrinhMang
                 // 2. Yêu cầu máy nguồn gửi dữ liệu bài làm (đã kiểm tra kết nối ở trên)
                 if (serverSocket != null)
                 {
-                    // QUAN TRỌNG: Gọi callback TRƯỚC để thiết lập copyDataTarget trước khi gửi yêu cầu
-                    // Điều này đảm bảo khi file đến, server đã biết cần chuyển tiếp đến đâu
                     onCopyComplete?.Invoke(mayNguon.IP, mayDich.IP);
                     
                     // Yêu cầu máy nguồn gửi dữ liệu với flag COPY_DATA (không hiển thị thông báo)
@@ -194,8 +197,6 @@ namespace LapTrinhMang
                 }
                 else
                 {
-                    // Nếu serverSocket null, chỉ copy thông tin sinh viên
-                    // Vẫn gọi callback để cập nhật danh sách máy
                     onCopyComplete?.Invoke(mayNguon.IP, mayDich.IP);
                 }
 

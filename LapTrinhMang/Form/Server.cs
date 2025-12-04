@@ -241,9 +241,11 @@ namespace LapTrinhMang
                     else if (msg.StartsWith("FILENAME|"))
                     {
                         // Nhận tên file từ máy nguồn trong quá trình copy
+                        string tenFile = msg.Substring("FILENAME|".Length).Trim();
+                        
                         if (dichCopyDuLieu.ContainsKey(ip))
                         {
-                            string tenFile = msg.Substring("FILENAME|".Length).Trim();
+                            // Đây là file trong quá trình copy dữ liệu
                             tenFileCopyDuLieu[ip] = tenFile;
                         }
                     }
@@ -261,11 +263,26 @@ namespace LapTrinhMang
 
                             // Reset flag cho file đầu tiên khi bắt đầu copy
                             daGuiFileDauTienCopy[ip] = false;
+                            
+                            // Xóa các tên file cũ nếu có (để tránh nhầm lẫn)
+                            if (tenFileCopyDuLieu.ContainsKey(ip))
+                            {
+                                tenFileCopyDuLieu.Remove(ip);
+                            }
 
                             // Chuyển tiếp thông tin sinh viên đến máy đích
                             var mayDich = dsMay?.FirstOrDefault(x => x.IP == ipDich);
                             if (mayDich != null && mayDich.IsConnected)
                             {
+                                // Gửi đường dẫn lưu đề thi TRƯỚC khi gửi COPY_STUDENT_INFO
+                                // Đảm bảo máy đích biết nơi lưu file trước khi nhận dữ liệu
+                                string linkDeThi = txtGuiDeThi.Text;
+                                if (!string.IsNullOrEmpty(linkDeThi))
+                                {
+                                    serverSocket.SendMessageToClient(ipDich, $"SAVEPATH|{linkDeThi}");
+                                    Thread.Sleep(300);
+                                }
+                                
                                 serverSocket.SendMessageToClient(ipDich, $"COPY_STUDENT_INFO|{jsonSinhVien}");
                             }
                         }
@@ -275,7 +292,6 @@ namespace LapTrinhMang
                         // Máy nguồn đã gửi xong tất cả dữ liệu (các file đề thi)
                         if (dichCopyDuLieu.ContainsKey(ip))
                         {
-                            string ipDich = dichCopyDuLieu[ip];
                             dichCopyDuLieu.Remove(ip); // Xóa sau khi hoàn thành
 
                             // Xóa các dictionary liên quan
@@ -331,16 +347,28 @@ namespace LapTrinhMang
                             try
                             {
                                 // Lấy tên file từ dictionary tenFileCopyDuLieu (đã được lưu khi nhận FILENAME message)
-                                string tenFileCopy = tenFileCopyDuLieu.ContainsKey(ip) 
-                                    ? tenFileCopyDuLieu[ip] 
-                                    : (duongDanBaiLam.ContainsKey(ip) 
-                                        ? duongDanBaiLam[ip] 
-                                        : $"BaiLam_{ip.Replace(".", "_")}.zip");
+                                string tenFileCopy = null;
                                 
-                                // Xóa tên file khỏi dictionary sau khi lấy
                                 if (tenFileCopyDuLieu.ContainsKey(ip))
                                 {
-                                    tenFileCopyDuLieu.Remove(ip);
+                                    tenFileCopy = tenFileCopyDuLieu[ip];
+                                    // KHÔNG xóa tên file ngay vì có thể còn nhiều file khác đang được gửi
+                                    // Chỉ xóa khi nhận COPY_DATA_COMPLETE
+                                }
+                                else if (duongDanBaiLam.ContainsKey(ip))
+                                {
+                                    tenFileCopy = duongDanBaiLam[ip];
+                                    // Không xóa duongDanBaiLam vì có thể còn dùng cho các file khác
+                                }
+                                else
+                                {
+                                    // Nếu không có tên file, tạo tên mặc định
+                                    tenFileCopy = $"DeThi_{ip.Replace(".", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                                }
+                                
+                                if (string.IsNullOrEmpty(tenFileCopy))
+                                {
+                                    return;
                                 }
                                 
                                 // Kiểm tra xem đây có phải là file đầu tiên trong quá trình copy không
@@ -352,6 +380,7 @@ namespace LapTrinhMang
                                     daGuiFileDauTienCopy[ip] = true;
                                     
                                     // Gửi đường dẫn lưu đề thi (từ txtGuiDeThi) cho máy đích
+                                    // Đảm bảo máy đích lưu vào đúng thư mục đề thi
                                     string linkDeThi = txtGuiDeThi.Text;
                                     if (!string.IsNullOrEmpty(linkDeThi))
                                     {
