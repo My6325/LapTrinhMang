@@ -1,7 +1,3 @@
-using DocumentFormat.OpenXml.Spreadsheet;
-using LapTrinhMang.Models;
-using LapTrinhMang.Networking;
-using LapTrinhMang.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,11 +6,16 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.Spreadsheet;
+using LapTrinhMang.Models;
+using LapTrinhMang.Networking;
+using LapTrinhMang.Utils;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -232,7 +233,7 @@ namespace LapTrinhMang
                         {
                             string ipDich = dichCopyDuLieu[ip];
                             string jsonSinhVien = msg.Substring("COPY_STUDENT_INFO|".Length).Trim();
-                            
+
                             // Chuyển tiếp thông tin sinh viên đến máy đích
                             var mayDich = dsMay?.FirstOrDefault(x => x.IP == ipDich);
                             if (mayDich != null && mayDich.IsConnected)
@@ -248,13 +249,13 @@ namespace LapTrinhMang
                         {
                             string ipDich = dichCopyDuLieu[ip];
                             dichCopyDuLieu.Remove(ip); // Xóa sau khi hoàn thành
-                            
+
                             // Xóa tên file khỏi dictionary nếu còn
                             if (tenFileCopyDuLieu.ContainsKey(ip))
                             {
                                 tenFileCopyDuLieu.Remove(ip);
                             }
-                            
+
                             // Hiển thị thông báo thành công
                             MessageBox.Show(
                                 $"Đã copy dữ liệu từ máy {ip} sang máy {ipDich} thành công!\n" +
@@ -264,7 +265,8 @@ namespace LapTrinhMang
                                 MessageBoxIcon.Information);
                         }
                     }
-                    else 
+
+                    else
                     {
                         MessageBox.Show($"[{ip}] gửi: {msg}");
                     }
@@ -939,6 +941,39 @@ namespace LapTrinhMang
                     "Lỗi",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);  
+            }
+        }
+
+        private void ngắtKếtNốiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClientInfo clientInfo = GetClientInfoFromContextMenu();
+
+            if (clientInfo == null)
+            {
+                MessageBox.Show("Không tìm thấy thông tin máy trạm.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!clientInfo.IsConnected)
+            {
+                MessageBox.Show($"Máy {clientInfo.IP} hiện không kết nối.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            DialogResult result = MessageBox.Show($"Bạn có chắc chắn muốn ngắt kết nối máy {clientInfo.IP} ({clientInfo.HoTen}) không?", "Xác nhận ngắt kết nối", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result != DialogResult.Yes)
+                return;
+
+            try
+            {
+                serverSocket.SendMessageToClient(clientInfo.IP, "DISCONNECT_REQUEST");
+
+                MessageBox.Show($"Đã gửi yêu cầu ngắt kết nối đến máy {clientInfo.IP}. Server sẽ cập nhật trạng thái ngay sau đó.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi gửi lệnh ngắt kết nối: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

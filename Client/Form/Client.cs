@@ -93,8 +93,15 @@ namespace Client
                                     dsSinhVienClient = ds;
                                     cbTTSV.DataSource = null;
                                     cbTTSV.DataSource = dsSinhVienClient;
-                                    cbTTSV.DisplayMember = "HoTen";
                                     cbTTSV.ValueMember = "MSSV";
+                                    cbTTSV.DisplayMember = null;
+                                    cbTTSV.FormattingEnabled = true;
+
+                                    if (cbTTSV.Tag == null)
+                                    {
+                                        cbTTSV.Format += CbTTSV_Format;
+                                        cbTTSV.Tag = true; // Đánh dấu đã đăng ký
+                                    }
                                 }));
                             }
                         }
@@ -171,7 +178,7 @@ namespace Client
                                         cbTTSV.DataSource = null;
                                         cbTTSV.DataSource = dsSinhVienClient;
                                         cbTTSV.DisplayMember = "HoTen";
-                                        cbTTSV.ValueMember = "MSSV";
+                                        cbTTSV.DisplayMember = null;
                                         cbTTSV.SelectedValue = sinhVien.MSSV;
                                         
                                         // Cập nhật các textbox
@@ -233,6 +240,23 @@ namespace Client
                                 "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             btnĐiemDanh.Enabled = true;
                         }
+                    }
+
+                    else if (msg == "DISCONNECT_REQUEST")
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            // 1. Client chủ động đóng kết nối (Gửi tín hiệu DISCONNECTED tới Server)
+                            if (socket.IsConnected)
+                            {
+                                socket.Disconnect();
+
+                                // 2. Cập nhật giao diện Client
+                                CapNhatGiaoDien(false);
+
+                                MessageBox.Show("Server đã yêu cầu ngắt kết nối.", "Ngắt kết nối", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                        }));
                     }
                 };
 
@@ -513,6 +537,12 @@ namespace Client
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
+        }
+
+        private void CbTTSV_Format(object sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem is StudentInfo sv)
+                e.Value = $"{sv.MSSV} - {sv.HoTen}";
         }
     }
 }

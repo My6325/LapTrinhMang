@@ -1,0 +1,155 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\LapTrinhMang\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|d:\\laptrinhmang\\client\\form\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{95452778-DC62-4228-9DE8-9EFEB899EF02}|Client\\Client.csproj|solutionrelative:client\\form\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\form\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\form\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\usercontrol\\ucmayconnect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\usercontrol\\ucmayconnect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\form\\copydulieu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\copydulieu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\form\\copydulieu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\copydulieu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\form\\frmnhapip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\frmnhapip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|d:\\laptrinhmang\\laptrinhmang\\form\\danhsachdiemdanh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{4414922B-3669-452D-95DE-C29E475F1A39}|LapTrinhMang\\Server.csproj|solutionrelative:laptrinhmang\\form\\danhsachdiemdanh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ucMayConnect.cs [Design]",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\UserControl\\ucMayConnect.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\UserControl\\ucMayConnect.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\UserControl\\ucMayConnect.cs [Design]",
+              "RelativeToolTip": "LapTrinhMang\\UserControl\\ucMayConnect.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T09:08:52.5Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Client.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\Client\\Form\\Client.cs",
+              "RelativeDocumentMoniker": "Client\\Form\\Client.cs",
+              "ToolTip": "D:\\LapTrinhMang\\Client\\Form\\Client.cs",
+              "RelativeToolTip": "Client\\Form\\Client.cs",
+              "ViewState": "AgIAAA0CAAAAAAAAAAAIwBACAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T08:56:42.211Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CopyDuLieu.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\CopyDuLieu.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\CopyDuLieu.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\CopyDuLieu.cs",
+              "RelativeToolTip": "LapTrinhMang\\Form\\CopyDuLieu.cs",
+              "ViewState": "AgIAAEEAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T08:54:16.438Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Server.cs",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\Server.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\Server.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\Server.cs",
+              "RelativeToolTip": "LapTrinhMang\\Form\\Server.cs",
+              "ViewState": "AgIAAAABAAAAAAAAAAAEwAoBAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T08:53:38.146Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Server.cs [Design]",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\Server.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\Server.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\Server.cs [Design]",
+              "RelativeToolTip": "LapTrinhMang\\Form\\Server.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T08:53:37.023Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "FrmNhapIP.cs [Design]",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\FrmNhapIP.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\FrmNhapIP.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\FrmNhapIP.cs [Design]",
+              "RelativeToolTip": "LapTrinhMang\\Form\\FrmNhapIP.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T08:53:35.803Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CopyDuLieu.cs [Design]",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\CopyDuLieu.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\CopyDuLieu.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\CopyDuLieu.cs [Design]",
+              "RelativeToolTip": "LapTrinhMang\\Form\\CopyDuLieu.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T08:53:26.691Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "DanhSachDiemDanh.cs [Design]",
+              "DocumentMoniker": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\DanhSachDiemDanh.cs",
+              "RelativeDocumentMoniker": "LapTrinhMang\\Form\\DanhSachDiemDanh.cs",
+              "ToolTip": "D:\\LapTrinhMang\\LapTrinhMang\\Form\\DanhSachDiemDanh.cs [Design]",
+              "RelativeToolTip": "LapTrinhMang\\Form\\DanhSachDiemDanh.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-04T08:53:34.402Z",
+              "EditorCaption": " [Design]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

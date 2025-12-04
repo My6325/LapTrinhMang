@@ -288,3 +288,6 @@ C:\Users\GIGABYTE\Source\Repos\LapTrinhMang\LapTrinhMang\obj\Debug\Server.csproj
 C:\Users\GIGABYTE\Source\Repos\LapTrinhMang\LapTrinhMang\obj\Debug\Server.csproj.Up2Date
 C:\Users\GIGABYTE\Source\Repos\LapTrinhMang\LapTrinhMang\obj\Debug\LapTrinhMang.exe
 C:\Users\GIGABYTE\Source\Repos\LapTrinhMang\LapTrinhMang\obj\Debug\LapTrinhMang.pdb
+D:\LapTrinhMang\LapTrinhMang\obj\Debug\LapTrinhMang.CopyDuLieu.resources
+D:\LapTrinhMang\LapTrinhMang\obj\Debug\LapTrinhMang.DanhSachDiemDanh.resources
+D:\LapTrinhMang\LapTrinhMang\obj\Debug\LapTrinhMang.GuiTinNhanClients.resources

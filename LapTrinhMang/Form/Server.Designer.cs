@@ -55,6 +55,7 @@
             this.gửiTinNhắnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnXemDSDD = new System.Windows.Forms.Button();
             this.btnThuLaiDe = new System.Windows.Forms.Button();
+            this.ngắtKếtNốiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gbDeThi.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nupThoiGian)).BeginInit();
             this.gbDSMay.SuspendLayout();
@@ -278,9 +279,10 @@
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.copyDữLiệuToolStripMenuItem,
-            this.gửiTinNhắnToolStripMenuItem});
+            this.gửiTinNhắnToolStripMenuItem,
+            this.ngắtKếtNốiToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(163, 52);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(211, 104);
             // 
             // copyDữLiệuToolStripMenuItem
             // 
@@ -317,6 +319,13 @@
             this.btnThuLaiDe.Text = "Thu lại đề";
             this.btnThuLaiDe.UseVisualStyleBackColor = true;
             this.btnThuLaiDe.Click += new System.EventHandler(this.btnThuLaiDe_Click);
+            // 
+            // ngắtKếtNốiToolStripMenuItem
+            // 
+            this.ngắtKếtNốiToolStripMenuItem.Name = "ngắtKếtNốiToolStripMenuItem";
+            this.ngắtKếtNốiToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.ngắtKếtNốiToolStripMenuItem.Text = "Ngắt kết nối";
+            this.ngắtKếtNốiToolStripMenuItem.Click += new System.EventHandler(this.ngắtKếtNốiToolStripMenuItem_Click);
             // 
             // Server
             // 
@@ -387,6 +396,7 @@
         private System.Windows.Forms.ToolStripMenuItem gửiTinNhắnToolStripMenuItem;
         private System.Windows.Forms.Button btnXemDSDD;
         private System.Windows.Forms.Button btnThuLaiDe;
+        private System.Windows.Forms.ToolStripMenuItem ngắtKếtNốiToolStripMenuItem;
     }
 }
 
