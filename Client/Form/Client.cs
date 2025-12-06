@@ -121,14 +121,38 @@ namespace Client
                             Console.WriteLine($"Đã nhận đường dẫn lưu từ server: {duongDanLuuHienTai}");
                         }));
                     }
+                    else if (msg.StartsWith("DIRECTORY|"))
+                    {
+                        // Nhận thông tin thư mục cần tạo
+                        string duongDanThuMuc = msg.Substring("DIRECTORY|".Length).Trim();
+                        Invoke(new Action(() =>
+                        {
+                            try
+                            {
+                                string thuMuc = string.IsNullOrEmpty(duongDanLuuHienTai)
+                                    ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DefaultDeThi")
+                                    : duongDanLuuHienTai;
+                                
+                                if (!Directory.Exists(thuMuc))
+                                    Directory.CreateDirectory(thuMuc);
+
+                                // Tạo thư mục con
+                                string duongDanThuMucDayDu = Path.Combine(thuMuc, duongDanThuMuc);
+                                if (!Directory.Exists(duongDanThuMucDayDu))
+                                {
+                                    Directory.CreateDirectory(duongDanThuMucDayDu);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Lỗi khi tạo thư mục: {ex.Message}");
+                            }
+                        }));
+                    }
                     else if (msg.StartsWith("FILENAME|"))
                     {
                         // Lưu tên file để dùng khi nhận file
                         tenFileHienTai = msg.Substring("FILENAME|".Length).Trim();
-                        Invoke(new Action(() =>
-                        {
-                            Console.WriteLine($"Chuẩn bị nhận file: {tenFileHienTai}");
-                        }));
                     }
                     else if (msg == "YEUCAU_NOPBAI")
                     {
@@ -498,12 +522,32 @@ namespace Client
 
             try
             {
-                // Gửi thông tin sinh viên trước khi gửi file
+                // Gửi thông tin sinh viên trước để server thiết lập mapping
                 if (sinhVienDaChon != null)
                 {
                     string jsonSinhVien = JsonSerializer.Serialize(sinhVienDaChon);
                     socket.SendMessage($"COPY_STUDENT_INFO|{jsonSinhVien}");
-                    Thread.Sleep(300);
+                    Thread.Sleep(500); // Đợi server xử lý và thiết lập mapping
+                }
+
+                // Gửi tất cả thư mục con sau khi COPY_STUDENT_INFO đã được xử lý (kể cả thư mục rỗng)
+                string[] danhSachThuMuc = Directory.GetDirectories(thuMucNguon, "*", SearchOption.AllDirectories);
+                foreach (string duongDanThuMuc in danhSachThuMuc)
+                {
+                    // Tính đường dẫn tương đối từ thư mục gốc
+                    string duongDanTuongDoi = duongDanThuMuc;
+                    if (duongDanThuMuc.StartsWith(thuMucNguon, StringComparison.OrdinalIgnoreCase))
+                    {
+                        duongDanTuongDoi = duongDanThuMuc.Substring(thuMucNguon.Length);
+                        if (duongDanTuongDoi.StartsWith("\\") || duongDanTuongDoi.StartsWith("/"))
+                        {
+                            duongDanTuongDoi = duongDanTuongDoi.Substring(1);
+                        }
+                    }
+                    
+                    // Gửi thông tin thư mục
+                    socket.SendMessage($"DIRECTORY|{duongDanTuongDoi}");
+                    Thread.Sleep(200);
                 }
 
                 // Gửi các file từ thư mục phát đề (bao gồm cả thư mục con)
@@ -535,16 +579,14 @@ namespace Client
                         // Gửi đường dẫn tương đối (bao gồm cả thư mục con nếu có) trước
                         socket.SendMessage($"FILENAME|{duongDanTuongDoi}");
                         Thread.Sleep(300);
-
-                        // Gửi nội dung file
                         socket.SendFile(duLieuFile);
-                        Thread.Sleep(500); // Đợi giữa các file
+                        Thread.Sleep(500); 
 
                         soLuongFileDaGui++;
                     }
                     catch
                     {
-                        // Tiếp tục gửi các file khác
+                        
                     }
 
                     soLuongFile++;
@@ -560,11 +602,6 @@ namespace Client
                 if (soLuongFileDaGui > 0)
                 {
                     XoaDuLieuDaCopy();
-                }
-                else
-                {
-                    MessageBox.Show("Không có file nào để copy. Thư mục đề thi có thể rỗng hoặc chỉ chứa file ZIP.", 
-                        "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)

@@ -238,6 +238,22 @@ namespace LapTrinhMang
                             tenFileCopyDuLieu[ip] = tenFile;
                         }
                     }
+                    else if (msg.StartsWith("DIRECTORY|"))
+                    {
+                        // Nhận thông tin thư mục từ máy nguồn trong quá trình copy
+                        if (dichCopyDuLieu.ContainsKey(ip))
+                        {
+                            string ipDich = dichCopyDuLieu[ip];
+                            string duongDanThuMuc = msg.Substring("DIRECTORY|".Length).Trim();
+                            
+                            // Chuyển tiếp thông tin thư mục đến máy đích
+                            var mayDich = dsMay?.FirstOrDefault(x => x.IP == ipDich);
+                            if (mayDich != null && mayDich.IsConnected)
+                            {
+                                serverSocket.SendMessageToClient(ipDich, $"DIRECTORY|{duongDanThuMuc}");
+                            }
+                        }
+                    }
                     else if (msg.StartsWith("FILENAME|"))
                     {
                         // Nhận tên file từ máy nguồn trong quá trình copy

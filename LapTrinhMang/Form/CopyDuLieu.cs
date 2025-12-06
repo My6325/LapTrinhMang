@@ -161,25 +161,6 @@ namespace LapTrinhMang
                 return;
             }
 
-            // Xác nhận
-            string thongTinMayDich = string.IsNullOrEmpty(mayDich.MSSV) || mayDich.MSSV == "Mới/Chưa ĐD"
-                ? "Chưa điểm danh"
-                : $"{mayDich.MSSV} - {mayDich.HoTen}";
-            
-            DialogResult result = MessageBox.Show(
-                $"Bạn có chắc muốn copy dữ liệu từ máy {mayNguon.IP} ({mayNguon.MSSV} - {mayNguon.HoTen}) sang máy {mayDich.IP} ({thongTinMayDich})?\n\n" +
-                $"Thông tin sẽ được copy:\n" +
-                $"- MSSV: {mayNguon.MSSV}\n" +
-                $"- Họ tên: {mayNguon.HoTen}\n" +
-                $"- Dữ liệu bài làm (nếu có)\n\n" +
-                $"Lưu ý: IP của máy đích sẽ được giữ nguyên.",
-                "Xác nhận Copy dữ liệu",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result != DialogResult.Yes)
-                return;
-
             try
             {
                 // 1. Copy thông tin sinh viên (MSSV, HoTen) từ máy nguồn sang máy đích
