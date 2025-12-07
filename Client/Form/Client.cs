@@ -627,8 +627,8 @@ namespace Client
                     return;
                 }
 
-                // Lấy danh sách tất cả file trong thư mục (bao gồm cả file ZIP)
-                string[] danhSachFile = Directory.GetFiles(thuMucDeThi);
+                // Lấy danh sách tất cả file trong thư mục và thư mục con (bao gồm cả file ZIP)
+                string[] danhSachFile = Directory.GetFiles(thuMucDeThi, "*", SearchOption.AllDirectories);
                 int soLuongFile = danhSachFile.Length;
 
                 if (soLuongFile == 0)
@@ -706,21 +706,42 @@ namespace Client
                     }
                 }
 
+                // Xóa tất cả thư mục rỗng sau khi xóa file
+                // Lấy danh sách tất cả thư mục con (từ sâu nhất lên)
+                string[] danhSachThuMuc = Directory.GetDirectories(thuMucDeThi, "*", SearchOption.AllDirectories);
+                int soThuMucDaXoa = 0;
+                List<string> danhSachThuMucLoi = new List<string>();
+                
+                // Sắp xếp theo độ sâu (thư mục sâu nhất trước) để xóa từ trong ra ngoài
+                Array.Sort(danhSachThuMuc, (a, b) => b.Length.CompareTo(a.Length));
+                
+                foreach (string duongDanThuMuc in danhSachThuMuc)
+                {
+                    try
+                    {
+                        // Kiểm tra thư mục có tồn tại và rỗng không
+                        if (Directory.Exists(duongDanThuMuc))
+                        {
+                            // Kiểm tra thư mục rỗng (không có file và không có thư mục con)
+                            string[] fileTrongThuMuc = Directory.GetFiles(duongDanThuMuc);
+                            string[] thuMucTrongThuMuc = Directory.GetDirectories(duongDanThuMuc);
+                            
+                            if (fileTrongThuMuc.Length == 0 && thuMucTrongThuMuc.Length == 0)
+                            {
+                                Directory.Delete(duongDanThuMuc, false);
+                                soThuMucDaXoa++;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        danhSachThuMucLoi.Add(Path.GetFileName(duongDanThuMuc));
+                        Console.WriteLine($"Lỗi khi xóa thư mục {duongDanThuMuc}: {ex.Message}");
+                    }
+                }
+
                 // Xóa tên file hiển thị trên form
                 txtDeThi.Text = "";
-
-                // Hiển thị thông báo kết quả
-                string thongBao = $"Đã xóa {soFileDaXoa}/{soLuongFile} file sau khi copy dữ liệu sang máy đích.";
-                if (danhSachFileLoi.Count > 0)
-                {
-                    thongBao += $"\n\nKhông thể xóa {danhSachFileLoi.Count} file:\n" + string.Join("\n", danhSachFileLoi);
-                }
-                
-                MessageBox.Show(
-                    thongBao,
-                    soFileDaXoa == soLuongFile ? "Thành công" : "Cảnh báo",
-                    MessageBoxButtons.OK,
-                    soFileDaXoa == soLuongFile ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
