@@ -20,7 +20,7 @@ namespace LapTrinhMang
         public GuiTinNhanClients()
         {
             InitializeComponent();
-            InitializeEvents();
+            
         }
 
         public GuiTinNhanClients(ServerSocket serverSocket, List<ClientInfo> dsMay)
@@ -28,7 +28,7 @@ namespace LapTrinhMang
             InitializeComponent();
             this.serverSocket = serverSocket;
             this.dsMay = dsMay;
-            InitializeEvents();
+            
         }
 
         public GuiTinNhanClients(ServerSocket serverSocket, List<ClientInfo> dsMay, ClientInfo selectedClient)
@@ -36,7 +36,6 @@ namespace LapTrinhMang
             InitializeComponent();
             this.serverSocket = serverSocket;
             this.dsMay = dsMay;
-            InitializeEvents();
             if (selectedClient != null)
             {
                 rd_GuiTNMotMay.Checked = true;
@@ -44,31 +43,8 @@ namespace LapTrinhMang
             }
         }
 
-        private void InitializeEvents()
-        {
-            // Làm cho hai radio button loại trừ lẫn nhau
-            rd_GuiTNMotMay.CheckedChanged += Rd_GuiTNMotMay_CheckedChanged;
-            rd_GuiTNNhieuMay.CheckedChanged += Rd_GuiTNNhieuMay_CheckedChanged;
-            btnGuiTinNhan.Click += BtnGuiTinNhan_Click;
-        }
 
-        private void Rd_GuiTNMotMay_CheckedChanged(object sender, EventArgs e)
-        {
-            if (rd_GuiTNMotMay.Checked)
-            {
-                rd_GuiTNNhieuMay.Checked = false;
-            }
-        }
-
-        private void Rd_GuiTNNhieuMay_CheckedChanged(object sender, EventArgs e)
-        {
-            if (rd_GuiTNNhieuMay.Checked)
-            {
-                rd_GuiTNMotMay.Checked = false;
-            }
-        }
-
-        private void BtnGuiTinNhan_Click(object sender, EventArgs e)
+        private void btnGuiTinNhan_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtTinNhan.Text))
             {
@@ -99,8 +75,8 @@ namespace LapTrinhMang
                 if (rd_GuiTNMotMay.Checked)
                 {
                     string ipPC = txtIPPC.Text.Trim();
-                    
-                    var may = dsMay.FirstOrDefault(m => 
+
+                    var may = dsMay.FirstOrDefault(m =>
                         (m.MSSV != null && m.MSSV.Equals(ipPC, StringComparison.OrdinalIgnoreCase)) ||
                         (m.IP != null && m.IP.Equals(ipPC, StringComparison.OrdinalIgnoreCase)) ||
                         (m.HoTen != null && m.HoTen.IndexOf(ipPC, StringComparison.OrdinalIgnoreCase) >= 0)
@@ -139,6 +115,22 @@ namespace LapTrinhMang
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi gửi tin nhắn: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void rd_GuiTNMotMay_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rd_GuiTNMotMay.Checked)
+            {
+                rd_GuiTNNhieuMay.Checked = false;
+            }
+        }
+
+        private void rd_GuiTNNhieuMay_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rd_GuiTNNhieuMay.Checked)
+            {
+                rd_GuiTNMotMay.Checked = false;
             }
         }
     }

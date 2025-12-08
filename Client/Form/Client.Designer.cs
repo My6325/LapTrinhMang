@@ -33,6 +33,8 @@
             this.lblTTSV = new System.Windows.Forms.Label();
             this.cbTTSV = new System.Windows.Forms.ComboBox();
             this.gbTTSV = new System.Windows.Forms.GroupBox();
+            this.txtDeThi = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.txtHoTen = new System.Windows.Forms.TextBox();
             this.txtMSSV = new System.Windows.Forms.TextBox();
             this.txtLop = new System.Windows.Forms.TextBox();
@@ -41,8 +43,6 @@
             this.lblLop = new System.Windows.Forms.Label();
             this.btnConnect = new System.Windows.Forms.Button();
             this.btnĐiemDanh = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.txtDeThi = new System.Windows.Forms.TextBox();
             this.gbTTSV.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -114,6 +114,31 @@
             this.gbTTSV.TabStop = false;
             this.gbTTSV.Text = "Thông tin sinh viên:";
             // 
+            // txtDeThi
+            // 
+            this.txtDeThi.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtDeThi.Location = new System.Drawing.Point(116, 160);
+            this.txtDeThi.Multiline = true;
+            this.txtDeThi.Name = "txtDeThi";
+            this.txtDeThi.ReadOnly = true;
+            this.txtDeThi.Size = new System.Drawing.Size(242, 28);
+            this.txtDeThi.TabIndex = 8;
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(18, 168);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 20);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Đề thi:";
+            // 
             // txtHoTen
             // 
             this.txtHoTen.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -121,6 +146,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtHoTen.Location = new System.Drawing.Point(116, 115);
             this.txtHoTen.Name = "txtHoTen";
+            this.txtHoTen.ReadOnly = true;
             this.txtHoTen.Size = new System.Drawing.Size(242, 28);
             this.txtHoTen.TabIndex = 6;
             // 
@@ -131,6 +157,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtMSSV.Location = new System.Drawing.Point(116, 73);
             this.txtMSSV.Name = "txtMSSV";
+            this.txtMSSV.ReadOnly = true;
             this.txtMSSV.Size = new System.Drawing.Size(242, 28);
             this.txtMSSV.TabIndex = 5;
             // 
@@ -141,6 +168,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtLop.Location = new System.Drawing.Point(116, 28);
             this.txtLop.Name = "txtLop";
+            this.txtLop.ReadOnly = true;
             this.txtLop.Size = new System.Drawing.Size(242, 28);
             this.txtLop.TabIndex = 4;
             // 
@@ -204,30 +232,6 @@
             this.btnĐiemDanh.Text = "Điểm danh";
             this.btnĐiemDanh.UseVisualStyleBackColor = true;
             this.btnĐiemDanh.Click += new System.EventHandler(this.btnĐiemDanh_Click);
-            // 
-            // label1
-            // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(18, 168);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(57, 20);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "Đề thi:";
-            // 
-            // txtDeThi
-            // 
-            this.txtDeThi.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDeThi.Location = new System.Drawing.Point(116, 160);
-            this.txtDeThi.Multiline = true;
-            this.txtDeThi.Name = "txtDeThi";
-            this.txtDeThi.Size = new System.Drawing.Size(242, 28);
-            this.txtDeThi.TabIndex = 8;
             // 
             // Client
             // 

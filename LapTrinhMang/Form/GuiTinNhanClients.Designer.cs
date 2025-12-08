@@ -31,12 +31,12 @@
             this.label1 = new System.Windows.Forms.Label();
             this.txtTinNhan = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.txtIPPC = new System.Windows.Forms.TextBox();
             this.rd_GuiTNMotMay = new System.Windows.Forms.RadioButton();
+            this.label2 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.rd_GuiTNNhieuMay = new System.Windows.Forms.RadioButton();
             this.btnGuiTinNhan = new System.Windows.Forms.Button();
-            this.txtIPPC = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -72,16 +72,12 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Gửi một máy";
             // 
-            // groupBox2
+            // txtIPPC
             // 
-            this.groupBox2.Controls.Add(this.rd_GuiTNNhieuMay);
-            this.groupBox2.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(268, 115);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(263, 193);
-            this.groupBox2.TabIndex = 2;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Gửi tất cả máy";
+            this.txtIPPC.Location = new System.Drawing.Point(7, 111);
+            this.txtIPPC.Name = "txtIPPC";
+            this.txtIPPC.Size = new System.Drawing.Size(232, 30);
+            this.txtIPPC.TabIndex = 1;
             // 
             // rd_GuiTNMotMay
             // 
@@ -93,6 +89,28 @@
             this.rd_GuiTNMotMay.TabStop = true;
             this.rd_GuiTNMotMay.Text = "Gửi tin nhắn cho một máy";
             this.rd_GuiTNMotMay.UseVisualStyleBackColor = true;
+            this.rd_GuiTNMotMay.CheckedChanged += new System.EventHandler(this.rd_GuiTNMotMay_CheckedChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(42, 76);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(165, 22);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Nhập IP PC cần gửi";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.rd_GuiTNNhieuMay);
+            this.groupBox2.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox2.Location = new System.Drawing.Point(268, 115);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(263, 193);
+            this.groupBox2.TabIndex = 2;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Gửi tất cả máy";
             // 
             // rd_GuiTNNhieuMay
             // 
@@ -104,6 +122,7 @@
             this.rd_GuiTNNhieuMay.TabStop = true;
             this.rd_GuiTNNhieuMay.Text = "Gửi tin nhắn cho tất cả máy";
             this.rd_GuiTNNhieuMay.UseVisualStyleBackColor = true;
+            this.rd_GuiTNNhieuMay.CheckedChanged += new System.EventHandler(this.rd_GuiTNNhieuMay_CheckedChanged);
             // 
             // btnGuiTinNhan
             // 
@@ -114,23 +133,7 @@
             this.btnGuiTinNhan.TabIndex = 3;
             this.btnGuiTinNhan.Text = "Gửi Tin nhắn";
             this.btnGuiTinNhan.UseVisualStyleBackColor = true;
-            // 
-            // txtIPPC
-            // 
-            this.txtIPPC.Location = new System.Drawing.Point(7, 111);
-            this.txtIPPC.Name = "txtIPPC";
-            this.txtIPPC.Size = new System.Drawing.Size(232, 30);
-            this.txtIPPC.TabIndex = 1;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(42, 76);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(165, 22);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "Nhập IP PC cần gửi";
+            this.btnGuiTinNhan.Click += new System.EventHandler(this.btnGuiTinNhan_Click);
             // 
             // GuiTinNhanClients
             // 

@@ -44,7 +44,7 @@
             this.label1.Location = new System.Drawing.Point(12, 19);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(100, 22);
+            this.label1.Size = new System.Drawing.Size(102, 22);
             this.label1.TabIndex = 0;
             this.label1.Text = "Máy nguồn:";
             // 
@@ -82,7 +82,7 @@
             this.groupBox1.Controls.Add(this.lblThongTinNguon);
             this.groupBox1.Location = new System.Drawing.Point(16, 100);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(404, 80);
+            this.groupBox1.Size = new System.Drawing.Size(404, 126);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Thông tin máy nguồn";
@@ -92,13 +92,13 @@
             this.lblThongTinNguon.AutoSize = true;
             this.lblThongTinNguon.Location = new System.Drawing.Point(6, 30);
             this.lblThongTinNguon.Name = "lblThongTinNguon";
-            this.lblThongTinNguon.Size = new System.Drawing.Size(89, 22);
+            this.lblThongTinNguon.Size = new System.Drawing.Size(94, 22);
             this.lblThongTinNguon.TabIndex = 0;
             this.lblThongTinNguon.Text = "Chưa chọn";
             // 
             // btnCopyDuLieu
             // 
-            this.btnCopyDuLieu.Location = new System.Drawing.Point(150, 195);
+            this.btnCopyDuLieu.Location = new System.Drawing.Point(152, 232);
             this.btnCopyDuLieu.Name = "btnCopyDuLieu";
             this.btnCopyDuLieu.Size = new System.Drawing.Size(150, 47);
             this.btnCopyDuLieu.TabIndex = 5;
@@ -110,7 +110,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 22F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(432, 254);
+            this.ClientSize = new System.Drawing.Size(432, 291);
             this.Controls.Add(this.btnCopyDuLieu);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.cbMayDich);
@@ -118,7 +118,7 @@
             this.Controls.Add(this.cbMayNguon);
             this.Controls.Add(this.label1);
             this.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "CopyDuLieu";
             this.Text = "Copy dữ liệu";
             this.groupBox1.ResumeLayout(false);

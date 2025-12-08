@@ -675,12 +675,11 @@ namespace Client
                             }
                             catch (IOException)
                             {
-                                // File đang được sử dụng, đợi một chút rồi thử lại
                                 soLanThu++;
                                 if (soLanThu < 5)
                                 {
                                     Thread.Sleep(delayTime);
-                                    delayTime += 200; // Tăng dần thời gian đợi
+                                    delayTime += 200; 
                                 }
                                 Console.WriteLine($"Lần thử {soLanThu}: File đang được sử dụng, đợi {delayTime}ms...");
                             }
