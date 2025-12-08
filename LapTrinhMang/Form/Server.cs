@@ -638,6 +638,7 @@ namespace LapTrinhMang
         private void btnPhatDe_Click(object sender, EventArgs e)
         {
             string linkDeThi = txtGuiDeThi.Text;
+            string linkLuuBaiThi=txtLuuBaiThi.Text;
             if (duongDanDeThi.Count == 0)
             {
                 MessageBox.Show("Chưa có đề thi nào được thêm!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -649,7 +650,11 @@ namespace LapTrinhMang
                 MessageBox.Show("Chưa chọn thư mục để gửi đề thi!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
+            if (string.IsNullOrEmpty(linkLuuBaiThi))
+            {
+                MessageBox.Show("Chưa chọn thư mục để lưu bài thi!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             int soPhut = (int)nupThoiGian.Value;
             if (soPhut <= 0)
             {
@@ -735,6 +740,7 @@ namespace LapTrinhMang
             if (!dangGiaHan && thoiGianConLai.TotalSeconds == 0)
             {
                 dangGiaHan = true;
+                timerDemNguoc.Stop();
                 serverSocket.BroadcastMessage("HETGIO");
 
                 MessageBox.Show("Đã hết thời gian làm bài",
@@ -742,6 +748,7 @@ namespace LapTrinhMang
 
                 // Bắt đầu đếm ngược 1 phút gia hạn
                 thoiGianConLai = TimeSpan.FromSeconds(60);
+                timerDemNguoc.Start();
                 return;
             }
 
